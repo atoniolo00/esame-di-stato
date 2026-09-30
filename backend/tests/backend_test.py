@@ -1,0 +1,197 @@
+"""Backend tests for ArchEsame API (Esame di Stato Architetto)"""
+import os
+import json
+import time
+import uuid
+import pytest
+import requests
+
+BASE_URL = os.environ.get("EXPO_PUBLIC_BACKEND_URL", "https://state-exam-master.preview.emergentagent.com").rstrip("/")
+API = f"{BASE_URL}/api"
+
+DEVICE_ID = f"test-device-{uuid.uuid4().hex[:8]}"
+
+
+@pytest.fixture(scope="module")
+def s():
+    session = requests.Session()
+    session.headers.update({"Content-Type": "application/json"})
+    return session
+
+
+# ---- Content -------------------------------------------------------------
+class TestContent:
+    def test_root(self, s):
+        r = s.get(f"{API}/")
+        assert r.status_code == 200
+        assert r.json().get("ok") is True
+
+    def test_categories(self, s):
+        r = s.get(f"{API}/categories")
+        assert r.status_code == 200
+        data = r.json()
+        assert isinstance(data, list)
+        assert len(data) == 12, f"Expected 12 categories, got {len(data)}"
+        for c in data:
+            assert {"slug", "name", "topic_count", "question_count", "flashcard_count"}.issubset(c.keys())
+            assert "_id" not in c
+
+    def test_topics_list(self, s):
+        r = s.get(f"{API}/topics")
+        assert r.status_code == 200
+        topics = r.json()
+        assert isinstance(topics, list) and len(topics) > 0
+        # content should be excluded from list view
+        assert "content" not in topics[0]
+
+    def test_topics_by_category(self, s):
+        r = s.get(f"{API}/topics", params={"category": "urbanistica"})
+        assert r.status_code == 200
+        assert all(t["category"] == "urbanistica" for t in r.json())
+
+    def test_topic_detail(self, s):
+        r = s.get(f"{API}/topics/urbanistica-fondamenti")
+        assert r.status_code == 200
+        t = r.json()
+        assert t["slug"] == "urbanistica-fondamenti"
+        assert "content" in t and len(t["content"]) > 100
+
+    def test_topic_not_found(self, s):
+        r = s.get(f"{API}/topics/does-not-exist")
+        assert r.status_code == 404
+
+    def test_flashcards(self, s):
+        r = s.get(f"{API}/flashcards", params={"category": "urbanistica"})
+        assert r.status_code == 200
+        cards = r.json()
+        assert len(cards) > 0
+        assert all(c["category"] == "urbanistica" for c in cards)
+        assert "front" in cards[0] and "back" in cards[0]
+
+    def test_tracce(self, s):
+        r = s.get(f"{API}/tracce")
+        assert r.status_code == 200
+        tracce = r.json()
+        assert isinstance(tracce, list) and len(tracce) > 0
+        first = tracce[0]
+        assert "tid" in first
+        # detail
+        r2 = s.get(f"{API}/tracce/{first['tid']}")
+        assert r2.status_code == 200
+        assert r2.json()["tid"] == first["tid"]
+
+    def test_traccia_not_found(self, s):
+        r = s.get(f"{API}/tracce/nope")
+        assert r.status_code == 404
+
+
+# ---- Quiz ----------------------------------------------------------------
+class TestQuiz:
+    def test_get_quiz_random(self, s):
+        r = s.get(f"{API}/quiz", params={"category": "urbanistica", "limit": 3})
+        assert r.status_code == 200
+        qs = r.json()
+        assert 1 <= len(qs) <= 3
+        for q in qs:
+            assert q["category"] == "urbanistica"
+            assert "options" in q and len(q["options"]) >= 2
+            assert "qid" in q
+
+    def test_submit_correct(self, s):
+        r = s.get(f"{API}/quiz", params={"limit": 1})
+        q = r.json()[0]
+        payload = {"device_id": DEVICE_ID, "question_id": q["qid"], "selected_index": q["correct"]}
+        r2 = s.post(f"{API}/quiz/submit", json=payload)
+        assert r2.status_code == 200
+        data = r2.json()
+        assert data["correct"] is True
+        assert data["correct_index"] == q["correct"]
+        assert "explanation" in data
+
+    def test_submit_wrong_creates_mistake(self, s):
+        r = s.get(f"{API}/quiz", params={"limit": 1})
+        q = r.json()[0]
+        wrong_idx = (q["correct"] + 1) % len(q["options"])
+        payload = {"device_id": DEVICE_ID, "question_id": q["qid"], "selected_index": wrong_idx}
+        r2 = s.post(f"{API}/quiz/submit", json=payload)
+        assert r2.status_code == 200
+        assert r2.json()["correct"] is False
+        # verify mistake persisted
+        m = s.get(f"{API}/mistakes", params={"device_id": DEVICE_ID})
+        assert m.status_code == 200
+        ids = [x["question_id"] for x in m.json()]
+        assert q["qid"] in ids
+
+    def test_submit_not_found(self, s):
+        r = s.post(f"{API}/quiz/submit", json={"device_id": DEVICE_ID, "question_id": "nope", "selected_index": 0})
+        assert r.status_code == 404
+
+    @pytest.mark.timeout(60)
+    def test_generate_quiz_ai(self, s):
+        r = s.post(f"{API}/quiz/generate", json={"category": "urbanistica", "count": 2}, timeout=90)
+        assert r.status_code == 200, f"got {r.status_code}: {r.text[:200]}"
+        out = r.json()
+        assert isinstance(out, list) and len(out) >= 1
+        assert out[0]["ai_generated"] is True
+        assert len(out[0]["options"]) >= 2
+
+
+# ---- Progress ------------------------------------------------------------
+class TestProgress:
+    def test_complete_topic(self, s):
+        r = s.post(f"{API}/topics/complete", json={"device_id": DEVICE_ID, "slug": "urbanistica-fondamenti"})
+        assert r.status_code == 200
+        assert r.json().get("ok") is True
+
+    def test_progress_shape(self, s):
+        r = s.get(f"{API}/progress", params={"device_id": DEVICE_ID})
+        assert r.status_code == 200
+        p = r.json()
+        for k in ["completed_topics", "streak", "best_streak", "total_attempts",
+                  "accuracy", "open_mistakes", "by_category", "total_topics"]:
+            assert k in p, f"missing key {k}"
+        assert p["streak"] >= 1
+        assert "urbanistica-fondamenti" in p["completed_topics"]
+        assert p["total_attempts"] >= 2
+
+    def test_mistakes_list(self, s):
+        r = s.get(f"{API}/mistakes", params={"device_id": DEVICE_ID})
+        assert r.status_code == 200
+        for m in r.json():
+            assert "explanation" in m and "options" in m
+
+
+# ---- Tutor (SSE streaming) -----------------------------------------------
+class TestTutor:
+    @pytest.mark.timeout(90)
+    def test_tutor_chat_stream(self, s):
+        sid = f"sess-{uuid.uuid4().hex[:6]}"
+        payload = {"device_id": DEVICE_ID, "session_id": sid,
+                   "message": "In una riga: cos'è il DM 1444/68?"}
+        r = requests.post(f"{API}/tutor/chat", json=payload, stream=True, timeout=90)
+        assert r.status_code == 200
+        deltas = 0
+        done = False
+        start = time.time()
+        for line in r.iter_lines(decode_unicode=True):
+            if not line:
+                continue
+            if line.startswith("data:"):
+                data = json.loads(line[5:].strip())
+                if "delta" in data:
+                    deltas += 1
+                if data.get("done"):
+                    done = True
+                    break
+            if time.time() - start > 80:
+                break
+        assert deltas > 0, "No SSE deltas received"
+        assert done, "No done event"
+
+        # verify history persisted (needs a tiny wait for background write)
+        time.sleep(1.5)
+        h = s.get(f"{API}/tutor/history", params={"device_id": DEVICE_ID, "session_id": sid})
+        assert h.status_code == 200
+        msgs = h.json()
+        roles = [m["role"] for m in msgs]
+        assert "user" in roles and "assistant" in roles

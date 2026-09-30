@@ -1,0 +1,195 @@
+{
+  "app_name": "ArchEsame",
+  "personality": "3 Editorial Mobile",
+  "personality_one_liner": "A calm, academic, and content-led reading experience that feels like a premium Italian architectural journal.",
+  "color": {
+    "surface": "#F9F8F6",
+    "onSurface": "#1C1A19",
+    "surfaceSecondary": "#EFECE7",
+    "onSurfaceSecondary": "#1C1A19",
+    "surfaceTertiary": "#E5E1DB",
+    "onSurfaceTertiary": "#4A4543",
+    "surfaceInverse": "#262423",
+    "onSurfaceInverse": "#F2EFEA",
+    "brand": "#C05A46",
+    "brandPrimary": "#C05A46",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#D47C6A",
+    "onBrandSecondary": "#1C1A19",
+    "brandTertiary": "#EAC6C0",
+    "onBrandTertiary": "#5C281E",
+    "success": "#3A6B4C",
+    "onSuccess": "#FFFFFF",
+    "warning": "#C78D32",
+    "onWarning": "#FFFFFF",
+    "error": "#963A3A",
+    "onError": "#FFFFFF",
+    "info": "#455E6B",
+    "onInfo": "#FFFFFF",
+    "border": "#E1DCD3",
+    "borderStrong": "#BDB6AB",
+    "divider": "#E1DCD3",
+    "muted": "#756D69",
+    "onBrand": "#FFFFFF"
+  },
+  "color_dark": {
+    "surface": "#161514",
+    "onSurface": "#EAE7E1",
+    "surfaceSecondary": "#242220",
+    "onSurfaceSecondary": "#EAE7E1",
+    "surfaceTertiary": "#312E2C",
+    "onSurfaceTertiary": "#C3BDB6",
+    "surfaceInverse": "#F9F8F6",
+    "onSurfaceInverse": "#161514",
+    "brand": "#D0715D",
+    "brandPrimary": "#D0715D",
+    "onBrandPrimary": "#161514",
+    "brandSecondary": "#B4533C",
+    "onBrandSecondary": "#FFFFFF",
+    "brandTertiary": "#5C281E",
+    "onBrandTertiary": "#EAC6C0",
+    "success": "#4A825D",
+    "onSuccess": "#FFFFFF",
+    "warning": "#DBA24A",
+    "onWarning": "#161514",
+    "error": "#B84B4B",
+    "onError": "#FFFFFF",
+    "info": "#5D7A8A",
+    "onInfo": "#FFFFFF",
+    "border": "#3A3734",
+    "borderStrong": "#54504D",
+    "divider": "#3A3734",
+    "muted": "#8F8984",
+    "onBrand": "#161514"
+  },
+  "typography": {
+    "displayFontFamily": "CormorantGaramond-Medium",
+    "textFontFamily": "Satoshi-Regular",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous vertical breathing room. Let typography and whitespace carry the personality. Magazine-like rhythms.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 2,
+    "md": 4,
+    "lg": 8,
+    "pill": 999
+  },
+  "shadow_tier": "0",
+  "navigation": "bottom_tabs",
+  "icon_set": "Feather",
+  "glassmorphism": {
+    "enabled": false,
+    "do's": [],
+    "dont's": [
+      "Avoid glassmorphism entirely. It clashes with the Editorial aesthetic.",
+      "Use solid surfaceSecondary or brandTertiary for elevation."
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "solid surfaceSecondary",
+      "android": "solid surfaceSecondary",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "haptics": {
+    "events": {
+      "primary_action": "impactMedium",
+      "tab_press": "selection",
+      "quiz_correct": "notificationSuccess",
+      "quiz_incorrect": "notificationError",
+      "flashcard_flip": "impactLight"
+    }
+  },
+  "screens": [
+    {
+      "name": "Home",
+      "purpose": "Dashboard showing study streak, progress overview, and a daily goal to motivate the user.",
+      "states": {
+        "loading": "Centered spinner using brand color.",
+        "empty": "No progress yet. Show 'Inizia a studiare' (Start studying) primary CTA.",
+        "error": "Failed to load progress. Show readable message with Retry button."
+      },
+      "layout": "Hero card at the top featuring a terracotta architectural arch image (with gradient scrim to text). Below: structural sections for 'Obiettivo Quotidiano' (Daily Goal) and 'Continua a studiare' (Continue studying). Use full-width editorial sections with quiet dividers."
+    },
+    {
+      "name": "Library (Studia)",
+      "purpose": "Topic library browsable by macro-argument (Urbanistica, Edilizia, Strutture, etc.) containing theory summary cards.",
+      "states": {
+        "loading": "Skeleton list of topics.",
+        "empty": "N/A - Topics are static/pre-loaded.",
+        "error": "Error loading topics."
+      },
+      "layout": "Magazine-style list with large serif headings. Each macro-argument is a clear, unboxed text section with generous padding. Tapping a topic opens the 'Theory Reader' screen which presents highly readable, article-like content with a sticky 'Mark as Completed' CTA."
+    },
+    {
+      "name": "Practice (Esercitati)",
+      "purpose": "Central hub for Quiz mode, Flashcards, and Past Exam Themes (Tracce).",
+      "states": {
+        "loading": "Spinner.",
+        "empty": "No quizzes attempted yet.",
+        "error": "Error loading practice data."
+      },
+      "layout": "Segmented control (Quiz / Flashcards / Tracce) at the top. Flashcard mode uses large, full-screen swipeable cards with a 'flip' tap gesture. Quiz mode shows the question in large serif font, followed by clean sans-serif choice buttons. Immediate feedback state turns choice green/red and reveals an 'Explanation' block."
+    },
+    {
+      "name": "AI Tutor",
+      "purpose": "Chat interface to ask questions about architectural topics and get grounded, contextual explanations.",
+      "states": {
+        "loading": "Subtle typing indicator.",
+        "empty": "Initial greeting from AI Tutor with suggested prompts (e.g. 'Spiega le NTC 2018').",
+        "error": "Message failed to send. Show retry icon."
+      },
+      "layout": "Native, docked composer at the bottom. Full-width message stream with 16px side padding. AI responses are cleanly formatted with markdown support. No floating inputs. Chat history available via a top-right header icon."
+    },
+    {
+      "name": "Progress (Statistiche)",
+      "purpose": "Detailed tracking of topics completed, quiz accuracy, weak areas, and mistakes review.",
+      "states": {
+        "loading": "Spinner.",
+        "empty": "No stats available. Prompt to take a quiz.",
+        "error": "Error loading stats."
+      },
+      "layout": "Data-heavy but editorial format. Large serif numbers for metrics (e.g., Accuracy %). A 'Mistakes Review' section listing past wrong answers that acts as a clickable list to view explanations."
+    }
+  ],
+  "images": {
+    "home_hero": {
+      "url": "https://images.unsplash.com/photo-1714427435156-66ba34ddb75e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzV8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwYXJjaGl0ZWN0dXJlJTIwdGVycmFjb3R0YXxlbnwwfHx8fDE3OTA3OTMxMDN8MA&ixlib=rb-4.1.0&q=85",
+      "dark": "https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNDR8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGdlb21ldHJpYyUyMGJ1aWxkaW5nfGVufDB8fHx8MTc5MDc5MzEwM3ww&ixlib=rb-4.1.0&q=85",
+      "alt": "Minimalist geometric architecture"
+    },
+    "empty_state_illustration": {
+      "url": "https://images.unsplash.com/photo-1462556791646-c201b8241a94?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNDR8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMGdlb21ldHJpYyUyMGJ1aWxkaW5nfGVufDB8fHx8MTc5MDc5MzEwM3ww&ixlib=rb-4.1.0&q=85",
+      "alt": "Abstract curtain wall building"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the 3 Editorial Mobile LIGHT personality. Do not use SaaS-style floating cards or heavy shadows. Use flat, unboxed structural layouts with generous whitespace.",
+    "Use CormorantGaramond-Medium for headings and Satoshi-Regular for body text. Rely on font size for hierarchy, keeping weight capped at 500.",
+    "The primary brand color is Terracotta (#C05A46). Ensure strict avoidance of any blue/indigo/purple hues throughout the application.",
+    "Implement the gradient-to-dark scrim pattern (Layer 0 image, Layer 1 linear gradient, Layer 2 text) for the home_hero image.",
+    "For the AI Tutor chat, dock the composer at the bottom and let the keyboard push the layout. Do not use a floating input that overlaps messages.",
+    "Ensure the Theory Reader screen emphasizes highly readable typography (line height 1.5x) and calm, restorative spacing to support long study sessions."
+  ]
+}

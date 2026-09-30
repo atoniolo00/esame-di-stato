@@ -1,0 +1,40 @@
+{
+  "summary": "Full backend + frontend testing of ArchEsame MVP (Esame di Stato Architetto). Backend: 18/18 pytest tests pass (categories x12, topics list/detail/404, flashcards, tracce, quiz random/submit correct+wrong+mistake persistence+404, quiz/generate via Claude AI, topics/complete, progress shape with streak/accuracy/by_category, mistakes, tutor SSE streaming with history persistence). Frontend: Home renders with hero, streak, obiettivo, categorie, CTAs. Studia tab: category chips + topic list open reader with markdown + 'Segna come completato' updates progress (streak went 0→1, completed 0→1). Esercitati tab: segmented Quiz/Flashcard/Tracce + category cards; Quiz flow works end-to-end (correct answer shows green check + explanation + 'Prossima domanda'). Tutor AI screen loads correctly with 4 suggerimenti and TextInput+send button. No deprecated Expo packages, no red screens, no console errors. Italian pluralization bug: '1 argomenti' should be '1 argomento'.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/tutor/chat", "issue": "Under pytest-xdist parallel LoadScope the SSE test occasionally received 0 deltas (flaky). Runs green sequentially and via curl. Likely test-side buffering, not a server bug. No action needed."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Home / category cards", "issue": "Italian plural bug: shows '1 argomenti' instead of '1 argomento' (and 2+ argomenti). Simple pluralization fix.", "testID": "n/a", "priority": "LOW"},
+      {"component": "Tutor chat TextInput", "issue": "Pressing Enter on the desktop web preview does not submit the message; user must tap the send button. Consider onSubmitEditing/blurOnSubmit for web. Send button itself works.", "testID": "n/a", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Home", "issues": ["Overall design is clean and consistent; touch targets look ≥44px; contrast good."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Fix Italian pluralization for topic count on Home ('1 argomento' vs 'N argomenti').",
+    "(Optional) Support Enter-to-send on Tutor TextInput for web preview (onSubmitEditing).",
+    "No further critical fixes needed; MVP is functional."
+  ],
+  "critical_code_review_comments": [
+    "server.py excludes MongoDB _id everywhere via projection - good.",
+    "Streaming SSE endpoint uses proper headers (X-Accel-Buffering:no) - working.",
+    "seed_data seeds only when empty (idempotent). Good.",
+    "EMERGENT_LLM_KEY guarded with 500 if missing - good.",
+    "All frontend routes use process.env.EXPO_PUBLIC_BACKEND_URL - good."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (18/18 sequential; 17/18 under parallel due to 1 flaky SSE)", "frontend": "100% of critical flows verified"},
+  "seed_data_creation": "None; app auto-seeds MongoDB on startup from seed_data.py.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend base URL: EXPO_PUBLIC_BACKEND_URL from /app/frontend/.env. Anonymous device_id, no auth. AI endpoints (POST /api/quiz/generate and POST /api/tutor/chat) may take up to ~30s. Use sequential pytest for the SSE tutor test to avoid parallel flakes.",
+  "rca_of_issue": "N/A — no blocking bugs. Two low-priority UX polish items only."
+}
