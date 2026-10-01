@@ -13,7 +13,7 @@ from datetime import datetime, timezone, date, timedelta
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage, TextDelta, StreamDone
 
-import seed_data
+import content
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -78,36 +78,48 @@ CONTEXT_BLURB = (
 # Seeding
 # =============================================================================
 async def seed_database():
-    if await db.categories.count_documents({}) == 0:
-        await db.categories.insert_many([dict(c) for c in seed_data.CATEGORIES])
-        logger.info("Seeded categories")
-    if await db.topics.count_documents({}) == 0:
-        await db.topics.insert_many([dict(t) for t in seed_data.TOPICS])
-        logger.info("Seeded topics")
-    if await db.questions.count_documents({}) == 0:
-        docs = []
-        for i, q in enumerate(seed_data.QUESTIONS):
-            d = dict(q)
-            d["qid"] = f"seed-{i}"
-            docs.append(d)
-        await db.questions.insert_many(docs)
-        logger.info("Seeded questions")
-    if await db.flashcards.count_documents({}) == 0:
-        docs = []
-        for i, f in enumerate(seed_data.FLASHCARDS):
-            d = dict(f)
-            d["fid"] = f"fc-{i}"
-            docs.append(d)
-        await db.flashcards.insert_many(docs)
-        logger.info("Seeded flashcards")
-    if await db.tracce.count_documents({}) == 0:
-        docs = []
-        for i, t in enumerate(seed_data.TRACCE):
-            d = dict(t)
-            d["tid"] = f"tr-{i}"
-            docs.append(d)
-        await db.tracce.insert_many(docs)
-        logger.info("Seeded tracce")
+    meta = await db.meta.find_one({"_id": "content"})
+    current = meta.get("version") if meta else 0
+    if current == content.CONTENT_VERSION:
+        return
+
+    # Categories — upsert by slug
+    for c in content.CATEGORIES:
+        await db.categories.update_one({"slug": c["slug"]}, {"$set": dict(c)}, upsert=True)
+
+    # Topics — upsert by slug (refresh deepened content)
+    for t in content.TOPICS:
+        await db.topics.update_one({"slug": t["slug"]}, {"$set": dict(t)}, upsert=True)
+
+    # Questions — upsert seed questions by stable qid (keeps AI-generated ones intact)
+    for i, q in enumerate(content.ALL_QUESTIONS):
+        d = dict(q)
+        d["qid"] = f"seed-{i}"
+        d.setdefault("ai_generated", False)
+        await db.questions.update_one({"qid": d["qid"]}, {"$set": d}, upsert=True)
+
+    # Flashcards — upsert by stable fid
+    for i, f in enumerate(content.ALL_FLASHCARDS):
+        d = dict(f)
+        d["fid"] = f"fc-{i}"
+        await db.flashcards.update_one({"fid": d["fid"]}, {"$set": d}, upsert=True)
+
+    # Tracce — upsert by stable tid
+    for i, t in enumerate(content.TRACCE):
+        d = dict(t)
+        d["tid"] = f"tr-{i}"
+        await db.tracce.update_one({"tid": d["tid"]}, {"$set": d}, upsert=True)
+
+    # Design questions — upsert by stable did
+    for i, dqd in enumerate(content.DESIGN_QUESTIONS):
+        d = dict(dqd)
+        d["did"] = f"dq-{i}"
+        await db.design_questions.update_one({"did": d["did"]}, {"$set": d}, upsert=True)
+
+    await db.meta.update_one(
+        {"_id": "content"}, {"$set": {"version": content.CONTENT_VERSION}}, upsert=True
+    )
+    logger.info(f"Seeded content v{content.CONTENT_VERSION}")
 
 
 @app.on_event("startup")
@@ -142,6 +154,17 @@ async def get_topics(category: Optional[str] = None):
     return topics
 
 
+@api_router.get("/topics/search")
+async def search_topics(q: str = Query("", min_length=0)):
+    term = q.strip()
+    if not term:
+        return []
+    rx = {"$regex": term, "$options": "i"}
+    query = {"$or": [{"title": rx}, {"subtitle": rx}, {"content": rx}, {"key_points": rx}]}
+    topics = await db.topics.find(query, {"_id": 0, "content": 0}).to_list(200)
+    return topics
+
+
 @api_router.get("/topics/{slug}")
 async def get_topic(slug: str):
     topic = await db.topics.find_one({"slug": slug}, {"_id": 0})
@@ -169,6 +192,12 @@ async def get_traccia(tid: str):
     return t
 
 
+@api_router.get("/design-questions")
+async def get_design_questions(category: Optional[str] = None):
+    q = {"category": category} if category else {}
+    return await db.design_questions.find(q, {"_id": 0}).to_list(200)
+
+
 # =============================================================================
 # Quiz endpoints
 # =============================================================================
@@ -181,6 +210,18 @@ async def get_quiz(category: Optional[str] = None, limit: int = 10):
     pipeline.append({"$project": {"_id": 0}})
     questions = await db.questions.aggregate(pipeline).to_list(limit)
     return questions
+
+
+@api_router.get("/quiz/simulation")
+async def get_simulation(count: int = 20, category: Optional[str] = None):
+    count = max(5, min(count, 40))
+    match = {"category": category} if category else {}
+    pipeline = []
+    if match:
+        pipeline.append({"$match": match})
+    pipeline.append({"$sample": {"size": count}})
+    pipeline.append({"$project": {"_id": 0}})
+    return await db.questions.aggregate(pipeline).to_list(count)
 
 
 @api_router.post("/quiz/submit")

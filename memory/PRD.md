@@ -41,6 +41,19 @@ Teoria basata sul riassunto "ceccarelli" (prontuario tecnico) e sulle tracce est
 - Testato: 18/18 test backend passati; flussi frontend verificati end-to-end.
 - Fix: plurali italiani, invio con Enter (web) nel tutor.
 
+## Iterazione 2 (2026-10-01)
+- Teoria approfondita e ampliata: ora 22 argomenti. Focus URBANISTICA con 8 argomenti
+  (fondamenti, zone/standard, piani attuativi, opere di urbanizzazione/oneri, perequazione,
+  vincoli/esproprio, rigenerazione, parametri e indici) e contenuti molto più dettagliati su tutte le materie.
+- Quesiti ampliati (urbanistica ~28) + quesiti di progettazione a calcolo (MCQ).
+- Nuova sezione "Progettazione": 6 quesiti aperti con svolgimento guidato (collection design_questions).
+- Simulazione d'esame a tempo (/simulation): setup (10/20/30 domande, tutte le materie o solo urbanistica),
+  timer countdown, esito con punteggio e correzione degli errori. Endpoint GET /api/quiz/simulation.
+- Preferiti (segnalibro) sugli argomenti (storage locale) + schermata /favorites.
+- Ricerca full-text sugli argomenti: endpoint GET /api/topics/search + schermata /search.
+- Seeding versionato (CONTENT_VERSION) con upsert idempotente: aggiorna i contenuti senza perdere il progresso.
+- Testato: 34/34 test backend passati; nuovi flussi frontend verificati end-to-end.
+
 ## Backlog prioritizzato
 - P1: contenuti — più domande/flashcard per categoria; più argomenti di teoria.
 - P1: ricerca full-text negli argomenti; segnalibri/preferiti.

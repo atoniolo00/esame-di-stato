@@ -119,6 +119,16 @@ export const getTracce = () => api<Traccia[]>("/tracce");
 export const getQuiz = (category: string, limit = 10) =>
   api<Question[]>(`/quiz?category=${category}&limit=${limit}`);
 
+export const getSimulation = (count = 20, category?: string) =>
+  api<Question[]>(`/quiz/simulation?count=${count}${category ? `&category=${category}` : ""}`);
+
+export const searchTopics = (q: string) =>
+  api<TopicMeta[]>(`/topics/search?q=${encodeURIComponent(q)}`);
+
+export type DesignQuestion = { did: string; category: string; titolo: string; prompt: string; guida: string };
+export const getDesignQuestions = (category?: string) =>
+  api<DesignQuestion[]>(`/design-questions${category ? `?category=${category}` : ""}`);
+
 export async function submitAnswer(questionId: string, selectedIndex: number) {
   const device_id = await ensureDeviceId();
   return api<{ correct: boolean; correct_index: number; explanation: string }>("/quiz/submit", {

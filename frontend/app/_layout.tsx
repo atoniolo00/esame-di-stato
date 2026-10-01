@@ -42,6 +42,9 @@ export default function RootLayout() {
                 <Stack.Screen name="flashcards/[category]" />
                 <Stack.Screen name="traccia/[tid]" />
                 <Stack.Screen name="progress" />
+                <Stack.Screen name="search" />
+                <Stack.Screen name="favorites" />
+                <Stack.Screen name="simulation" />
               </Stack>
             </KeyboardProvider>
           </GestureHandlerRootView>

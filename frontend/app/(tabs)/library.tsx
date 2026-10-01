@@ -39,8 +39,28 @@ export default function LibraryScreen() {
     <View style={styles.root}>
       {/* Sticky header + chips */}
       <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
-        <Text style={styles.title}>Studia</Text>
-        <Text style={styles.sub}>Teoria per argomento</Text>
+        <View style={styles.headerTop}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.title}>Studia</Text>
+            <Text style={styles.sub}>Teoria per argomento</Text>
+          </View>
+          <Pressable
+            testID="lib-search-btn"
+            onPress={() => router.push("/search" as any)}
+            style={styles.headerBtn}
+            hitSlop={8}
+          >
+            <Icon name="search" size={20} color={colors.onSurface} />
+          </Pressable>
+          <Pressable
+            testID="lib-favorites-btn"
+            onPress={() => router.push("/favorites" as any)}
+            style={styles.headerBtn}
+            hitSlop={8}
+          >
+            <Icon name="bookmark" size={20} color={colors.onSurface} />
+          </Pressable>
+        </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -116,6 +136,16 @@ const useStyles = makeStyles((colors) => ({
   },
   title: { fontFamily: fonts.display, fontSize: 32, color: colors.onSurface },
   sub: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted, marginBottom: spacing.sm },
+  headerTop: { flexDirection: "row", alignItems: "flex-start", gap: spacing.sm },
+  headerBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceSecondary,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: spacing.xs,
+  },
   chipScroller: { marginHorizontal: -spacing.lg },
   chipRow: { gap: spacing.sm, paddingHorizontal: spacing.lg, height: 56, alignItems: "center" },
   chip: {

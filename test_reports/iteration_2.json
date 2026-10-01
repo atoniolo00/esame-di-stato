@@ -1,0 +1,37 @@
+{
+  "summary": "Iteration 2 testing of ArchEsame (focus Urbanistica, Design questions, Search, Favorites, Simulation). Backend: 34/34 pytest tests PASS (18 regression from iteration 1 + 16 new). urbanistica now has 8 topics and 28 questions. GET /api/topics/search returns correct topics for 'perequazione' (3 results) and is case-insensitive; empty q returns []. GET /api/design-questions and ?category=urbanistica return 6 items with fields did/category/titolo/prompt/guida (note: Italian field name is 'titolo', not 'title'). GET /api/quiz/simulation count-clamped to [5,40], supports ?category=urbanistica, returns qid/options/correct/explanation. POST /api/quiz/submit still works and persists mistakes. All 6 new urbanistica topics return deep content (piani-attuativi, opere-urbanizzazione-oneri, perequazione-compensazione, vincoli-esproprio, rigenerazione-consumo-suolo, parametri-edilizi-urbanistici). Frontend (mobile viewport 390x844): Studia header has lib-search-btn + lib-favorites-btn. /search page: input works and returns 3 results for 'perequazione'. /favorites: shows empty state 'Nessun preferito' then displays the saved topic after toggling topic-favorite-button on /topic/perequazione-compensazione. /practice: 4 segments present (Quiz/Flashcard/Progett./Tracce) + practice-simulation-banner; Progett. shows expandable design-dq-0..5 cards with 'SVOLGIMENTO GUIDATO'. /simulation: setup (sim-count-10/20/30, sim-all/sim-urban, sim-start) → running (sim-option-N, sim-next) → esito screen with punteggio and sim-again/sim-exit all working end-to-end. No red screens, no console errors.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/iteration_2_full.xml"
+  ],
+  "action_items": [
+    "No blocking issues. Pre-existing low-prio polish from iteration 1 (Italian pluralization '1 argomenti'; Enter-to-send on Tutor TextInput) still open — optional.",
+    "Review request mentioned design-question field 'titolo'; UI uses 'titolo' correctly. If an English alias is desired for consistency, expose both 'titolo' and 'title' in the API response."
+  ],
+  "critical_code_review_comments": [
+    "server.py: /topics/search uses case-insensitive regex $or on title/subtitle/content/key_points — correct and matches the review spec. Empty q short-circuits to [] on the server (defense-in-depth over client ≥2 chars rule).",
+    "/quiz/simulation clamps count to [5,40] — good guard against abuse.",
+    "Seeding is versioned (CONTENT_VERSION=3) with upsert by stable qid/fid/tid/did — safe for repeated restarts and preserves AI-generated questions.",
+    "All list/detail endpoints project {_id: 0} — no ObjectId leaks.",
+    "frontend: topic-favorite-button on topic/[slug] correctly reads/writes via src/favorites.ts; /search debounces client-side ≥2 chars; /simulation uses countdown timer and single-shot /quiz/submit per answer."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py (added TestIteration2 with 16 new tests covering urbanistica counts, /topics/search, /design-questions, /quiz/simulation clamps & category filter, and 6 new urbanistica topic detail pages)"
+  ],
+  "success_rate": {"backend": "100% (34/34)", "frontend": "100% of iteration-2 flows verified (search, favorites, topic bookmark, practice 4-segments + banner, design cards, full simulation setup→running→result)"},
+  "seed_data_creation": "None manually created. Backend auto-seeds/upserts content v3 on startup from /app/backend/content.py and /app/backend/seed_data.py.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend base URL from frontend/.env (EXPO_PUBLIC_BACKEND_URL). Device IDs anonymous. For simulation, GET /api/quiz/simulation?count=N(&category=slug) with N clamped [5,40]. Favorites are device-local (AsyncStorage via src/favorites.ts) — no backend endpoint. Search uses MongoDB regex on title/subtitle/content/key_points (case-insensitive). Design questions field is 'titolo' (Italian), not 'title'. AI endpoints may take ~15–30s; use sequential pytest if SSE tutor is retested.",
+  "rca_of_issue": "N/A — all iteration-2 features function as specified."
+}

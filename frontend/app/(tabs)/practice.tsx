@@ -4,12 +4,12 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { getCategories, getTracce } from "@/src/api";
+import { getCategories, getDesignQuestions, getTracce } from "@/src/api";
 import { Icon, Loading } from "@/src/components/ui";
 import { usesNativeTabs } from "@/src/navigation";
 import { fonts, makeStyles, radius, spacing, useTheme } from "@/src/theme";
 
-type Mode = "quiz" | "flash" | "tracce";
+type Mode = "quiz" | "flash" | "tracce" | "design";
 
 export default function PracticeScreen() {
   const styles = useStyles();
@@ -19,12 +19,15 @@ export default function PracticeScreen() {
   const bottomChrome = usesNativeTabs ? insets.bottom : 0;
 
   const [mode, setMode] = useState<Mode>("quiz");
+  const [openDesign, setOpenDesign] = useState<string | null>(null);
   const catsQ = useQuery({ queryKey: ["categories"], queryFn: getCategories });
   const tracceQ = useQuery({ queryKey: ["tracce"], queryFn: getTracce });
+  const designQ = useQuery({ queryKey: ["design-questions"], queryFn: () => getDesignQuestions() });
 
   const segments: { key: Mode; label: string }[] = [
     { key: "quiz", label: "Quiz" },
     { key: "flash", label: "Flashcard" },
+    { key: "design", label: "Progett." },
     { key: "tracce", label: "Tracce" },
   ];
 
@@ -56,6 +59,22 @@ export default function PracticeScreen() {
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: bottomChrome + spacing.xxl, gap: spacing.md }}
           showsVerticalScrollIndicator={false}
         >
+          {/* Simulazione d'esame banner */}
+          <Pressable
+            testID="practice-simulation-banner"
+            style={styles.simBanner}
+            onPress={() => router.push("/simulation" as any)}
+          >
+            <View style={styles.simIcon}>
+              <Icon name="clock" size={22} color={colors.onBrandPrimary} />
+            </View>
+            <View style={styles.rowTextWrap}>
+              <Text style={styles.simTitle}>Simulazione d&apos;esame</Text>
+              <Text style={styles.simSub}>Prova a tempo con domande miste</Text>
+            </View>
+            <Icon name="arrow-right" size={20} color={colors.onBrandPrimary} />
+          </Pressable>
+
           {mode === "tracce"
             ? (tracceQ.data ?? []).map((t) => (
                 <Pressable
@@ -76,39 +95,65 @@ export default function PracticeScreen() {
                   <Icon name="chevron-right" size={20} color={colors.muted} />
                 </Pressable>
               ))
-            : (catsQ.data ?? []).map((c) => {
-                const count = mode === "quiz" ? c.question_count : c.flashcard_count;
-                return (
-                  <Pressable
-                    key={c.slug}
-                    testID={`practice-cat-${c.slug}`}
-                    style={styles.row}
-                    onPress={() =>
-                      router.push(
-                        (mode === "quiz" ? `/quiz/${c.slug}` : `/flashcards/${c.slug}`) as any,
-                      )
-                    }
-                  >
-                    <View style={styles.rowIcon}>
-                      <Icon name={c.icon} size={20} color={colors.brandPrimary} />
-                    </View>
-                    <View style={styles.rowTextWrap}>
-                      <Text style={styles.rowTitle}>{c.name}</Text>
-                      <Text style={styles.rowSub}>
-                        {count}{" "}
-                        {mode === "quiz"
-                          ? count === 1
-                            ? "domanda"
-                            : "domande"
-                          : count === 1
-                            ? "carta"
-                            : "carte"}
-                      </Text>
-                    </View>
-                    <Icon name="play-circle" size={22} color={colors.brandPrimary} />
-                  </Pressable>
-                );
-              })}
+            : mode === "design"
+              ? (designQ.data ?? []).map((d) => {
+                  const expanded = openDesign === d.did;
+                  return (
+                    <Pressable
+                      key={d.did}
+                      testID={`design-${d.did}`}
+                      style={styles.designCard}
+                      onPress={() => setOpenDesign(expanded ? null : d.did)}
+                    >
+                      <View style={styles.designHead}>
+                        <Text style={styles.designTitle}>{d.titolo}</Text>
+                        <Icon name={expanded ? "chevron-up" : "chevron-down"} size={18} color={colors.muted} />
+                      </View>
+                      <Text style={styles.designPrompt}>{d.prompt}</Text>
+                      {expanded ? (
+                        <View style={styles.designGuida}>
+                          <Text style={styles.designGuidaLabel}>SVOLGIMENTO GUIDATO</Text>
+                          <Text style={styles.designGuidaText}>{d.guida}</Text>
+                        </View>
+                      ) : (
+                        <Text style={styles.designHint}>Tocca per lo svolgimento guidato</Text>
+                      )}
+                    </Pressable>
+                  );
+                })
+              : (catsQ.data ?? []).map((c) => {
+                  const count = mode === "quiz" ? c.question_count : c.flashcard_count;
+                  return (
+                    <Pressable
+                      key={c.slug}
+                      testID={`practice-cat-${c.slug}`}
+                      style={styles.row}
+                      onPress={() =>
+                        router.push(
+                          (mode === "quiz" ? `/quiz/${c.slug}` : `/flashcards/${c.slug}`) as any,
+                        )
+                      }
+                    >
+                      <View style={styles.rowIcon}>
+                        <Icon name={c.icon} size={20} color={colors.brandPrimary} />
+                      </View>
+                      <View style={styles.rowTextWrap}>
+                        <Text style={styles.rowTitle}>{c.name}</Text>
+                        <Text style={styles.rowSub}>
+                          {count}{" "}
+                          {mode === "quiz"
+                            ? count === 1
+                              ? "domanda"
+                              : "domande"
+                            : count === 1
+                              ? "carta"
+                              : "carte"}
+                        </Text>
+                      </View>
+                      <Icon name="play-circle" size={22} color={colors.brandPrimary} />
+                    </Pressable>
+                  );
+                })}
         </ScrollView>
       )}
     </View>
@@ -158,4 +203,43 @@ const useStyles = makeStyles((colors) => ({
   rowTextWrap: { flex: 1, gap: 2 },
   rowTitle: { fontFamily: fonts.medium, fontSize: 16, color: colors.onSurface },
   rowSub: { fontFamily: fonts.regular, fontSize: 13, color: colors.muted },
+  segText2: { fontSize: 13 },
+  simBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    backgroundColor: colors.brandPrimary,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+  },
+  simIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: radius.md,
+    backgroundColor: colors.brandSecondary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  simTitle: { fontFamily: fonts.bold, fontSize: 16, color: colors.onBrandPrimary },
+  simSub: { fontFamily: fonts.regular, fontSize: 13, color: colors.onBrandPrimary, opacity: 0.9 },
+  designCard: {
+    backgroundColor: colors.surfaceSecondary,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: spacing.sm,
+  },
+  designHead: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  designTitle: { flex: 1, fontFamily: fonts.bold, fontSize: 16, color: colors.onSurface },
+  designPrompt: { fontFamily: fonts.regular, fontSize: 14, color: colors.onSurface, lineHeight: 21 },
+  designHint: { fontFamily: fonts.medium, fontSize: 12, color: colors.brandPrimary },
+  designGuida: {
+    backgroundColor: colors.brandTertiary,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  designGuidaLabel: { fontFamily: fonts.medium, fontSize: 11, letterSpacing: 1, color: colors.onBrandTertiary },
+  designGuidaText: { fontFamily: fonts.regular, fontSize: 14, color: colors.onBrandTertiary, lineHeight: 21 },
 }));

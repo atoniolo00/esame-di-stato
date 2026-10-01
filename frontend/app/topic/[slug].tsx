@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Markdown from "react-native-markdown-display";
 
 import { completeTopic, getProgress, getTopic } from "@/src/api";
+import { isFavorite, toggleFavorite } from "@/src/favorites";
 import { ErrorState, Icon, Loading, ScreenHeader } from "@/src/components/ui";
 import { fonts, makeStyles, radius, spacing, useTheme } from "@/src/theme";
 
@@ -20,6 +22,16 @@ export default function TopicScreen() {
   const progressQ = useQuery({ queryKey: ["progress"], queryFn: getProgress });
 
   const completed = !!progressQ.data?.completed_topics?.includes(slug!);
+
+  const [fav, setFav] = useState(false);
+  useEffect(() => {
+    if (slug) isFavorite(slug).then(setFav);
+  }, [slug]);
+  const onToggleFav = async () => {
+    const state = await toggleFavorite(slug!);
+    setFav(state);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+  };
 
   const completeMut = useMutation({
     mutationFn: () => completeTopic(slug!),
@@ -50,7 +62,14 @@ export default function TopicScreen() {
 
   return (
     <View style={styles.root}>
-      <ScreenHeader title="Argomento" />
+      <ScreenHeader
+        title="Argomento"
+        right={
+          <Pressable testID="topic-favorite-button" onPress={onToggleFav} hitSlop={10}>
+            <Icon name="bookmark" size={22} color={fav ? colors.brandPrimary : colors.muted} />
+          </Pressable>
+        }
+      />
       <ScrollView
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}

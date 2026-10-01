@@ -195,3 +195,99 @@ class TestTutor:
         msgs = h.json()
         roles = [m["role"] for m in msgs]
         assert "user" in roles and "assistant" in roles
+
+
+# ---- Iteration 2: Urbanistica focus, Search, Design Qs, Simulation --------
+class TestIteration2:
+    def test_urbanistica_counts(self, s):
+        r = s.get(f"{API}/categories")
+        assert r.status_code == 200
+        urb = next((c for c in r.json() if c["slug"] == "urbanistica"), None)
+        assert urb is not None, "urbanistica category missing"
+        # Expect ~8 topics and ~28 questions
+        assert urb["topic_count"] >= 8, f"urbanistica topic_count={urb['topic_count']} (<8)"
+        assert urb["question_count"] >= 25, f"urbanistica question_count={urb['question_count']} (<25)"
+
+    def test_search_perequazione(self, s):
+        r = s.get(f"{API}/topics/search", params={"q": "perequazione"})
+        assert r.status_code == 200
+        topics = r.json()
+        assert isinstance(topics, list) and len(topics) >= 1
+        # Should include perequazione-compensazione topic
+        slugs = [t["slug"] for t in topics]
+        assert "perequazione-compensazione" in slugs
+
+    def test_search_empty_returns_empty(self, s):
+        r = s.get(f"{API}/topics/search", params={"q": ""})
+        assert r.status_code == 200
+        assert r.json() == []
+
+    def test_search_case_insensitive(self, s):
+        r = s.get(f"{API}/topics/search", params={"q": "TOGNOLI"})
+        assert r.status_code == 200
+        assert len(r.json()) >= 1
+
+    def test_design_questions_all(self, s):
+        r = s.get(f"{API}/design-questions")
+        assert r.status_code == 200
+        dq = r.json()
+        assert isinstance(dq, list) and len(dq) >= 6
+        first = dq[0]
+        # fields present
+        for k in ("did", "category", "titolo", "prompt", "guida"):
+            assert k in first, f"missing field {k} in design question"
+
+    def test_design_questions_urbanistica(self, s):
+        r = s.get(f"{API}/design-questions", params={"category": "urbanistica"})
+        assert r.status_code == 200
+        dq = r.json()
+        assert len(dq) >= 6
+        assert all(d["category"] == "urbanistica" for d in dq)
+
+    def test_simulation_default(self, s):
+        r = s.get(f"{API}/quiz/simulation", params={"count": 10})
+        assert r.status_code == 200
+        qs = r.json()
+        assert isinstance(qs, list) and len(qs) == 10
+        for q in qs:
+            assert "qid" in q and "options" in q
+            assert "correct" in q and isinstance(q["correct"], int)
+            assert "explanation" in q
+
+    def test_simulation_urbanistica_20(self, s):
+        r = s.get(f"{API}/quiz/simulation", params={"count": 20, "category": "urbanistica"})
+        assert r.status_code == 200
+        qs = r.json()
+        # may be <20 if fewer available, but should be close
+        assert len(qs) >= 15, f"got only {len(qs)} urbanistica simulation questions"
+        assert all(q["category"] == "urbanistica" for q in qs)
+
+    def test_simulation_min_clamp(self, s):
+        # count<5 should be clamped to 5
+        r = s.get(f"{API}/quiz/simulation", params={"count": 1})
+        assert r.status_code == 200
+        assert len(r.json()) == 5
+
+    def test_simulation_max_clamp(self, s):
+        # count>40 should be clamped to 40
+        r = s.get(f"{API}/quiz/simulation", params={"count": 100})
+        assert r.status_code == 200
+        assert len(r.json()) == 40
+
+    @pytest.mark.parametrize("slug", [
+        "piani-attuativi",
+        "opere-urbanizzazione-oneri",
+        "perequazione-compensazione",
+        "vincoli-esproprio",
+        "rigenerazione-consumo-suolo",
+        "parametri-edilizi-urbanistici",
+    ])
+    def test_new_urbanistica_topics(self, s, slug):
+        r = s.get(f"{API}/topics/{slug}")
+        assert r.status_code == 200, f"topic {slug} not found"
+        t = r.json()
+        assert t["slug"] == slug
+        assert t["category"] == "urbanistica"
+        assert "content" in t and len(t["content"]) > 500, f"content too short for {slug}"
+        assert "key_points" in t and len(t["key_points"]) >= 3
+
