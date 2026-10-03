@@ -122,6 +122,15 @@ export default function HomeScreen() {
                   <Text style={styles.secondaryCtaText}>Le mie statistiche</Text>
                   <Icon name="chevron-right" size={18} color={colors.muted} />
                 </Pressable>
+                <Pressable
+                  testID="home-laws-cta"
+                  style={styles.secondaryCta}
+                  onPress={() => router.push("/laws" as any)}
+                >
+                  <Icon name="book" size={20} color={colors.onSurface} />
+                  <Text style={styles.secondaryCtaText}>Schede normativa</Text>
+                  <Icon name="chevron-right" size={18} color={colors.muted} />
+                </Pressable>
               </View>
             </>
           )}

@@ -45,6 +45,7 @@ export default function RootLayout() {
                 <Stack.Screen name="search" />
                 <Stack.Screen name="favorites" />
                 <Stack.Screen name="simulation" />
+                <Stack.Screen name="laws" />
               </Stack>
             </KeyboardProvider>
           </GestureHandlerRootView>

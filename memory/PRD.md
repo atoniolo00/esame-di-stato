@@ -54,6 +54,15 @@ Teoria basata sul riassunto "ceccarelli" (prontuario tecnico) e sulle tracce est
 - Seeding versionato (CONTENT_VERSION) con upsert idempotente: aggiorna i contenuti senza perdere il progresso.
 - Testato: 34/34 test backend passati; nuovi flussi frontend verificati end-to-end.
 
+## Iterazione 3 (2026-10-03)
+- Bacino quiz ampliato a ~116 domande (urbanistica ~41), con nuovi quesiti su tutte le materie.
+- Integrazione delle PROVE REALI IUAV 2024 (Sez. A prova pratica): temi "Scuola elementare di 5 aule"
+  e "Padiglione espositivo con sala conferenze" aggiunti sia come tracce sia come quesiti di progettazione guidati.
+- Nuova scheda NORMATIVA (/laws): 32 leggi/decreti con anno, numero, titolo e apporto, con ricerca testuale.
+  Endpoint GET /api/laws; accesso da Home e da Studia.
+- Seeding versionato v4 (upsert) con fix del re-seed.
+- Testato: 42/42 test backend passati; nuovi flussi frontend verificati.
+
 ## Backlog prioritizzato
 - P1: contenuti — più domande/flashcard per categoria; più argomenti di teoria.
 - P1: ricerca full-text negli argomenti; segnalibri/preferiti.

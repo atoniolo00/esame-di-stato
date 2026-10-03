@@ -129,6 +129,9 @@ export type DesignQuestion = { did: string; category: string; titolo: string; pr
 export const getDesignQuestions = (category?: string) =>
   api<DesignQuestion[]>(`/design-questions${category ? `?category=${category}` : ""}`);
 
+export type Law = { lid: string; anno: number; numero: string; titolo: string; categoria: string; apporto: string };
+export const getLaws = () => api<Law[]>("/laws");
+
 export async function submitAnswer(questionId: string, selectedIndex: number) {
   const device_id = await ensureDeviceId();
   return api<{ correct: boolean; correct_index: number; explanation: string }>("/quiz/submit", {

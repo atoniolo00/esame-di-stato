@@ -116,6 +116,12 @@ async def seed_database():
         d["did"] = f"dq-{i}"
         await db.design_questions.update_one({"did": d["did"]}, {"$set": d}, upsert=True)
 
+    # Laws — upsert by stable lid
+    for i, law in enumerate(content.LAWS):
+        d = dict(law)
+        d["lid"] = f"law-{i}"
+        await db.laws.update_one({"lid": d["lid"]}, {"$set": d}, upsert=True)
+
     await db.meta.update_one(
         {"_id": "content"}, {"$set": {"version": content.CONTENT_VERSION}}, upsert=True
     )
@@ -196,6 +202,12 @@ async def get_traccia(tid: str):
 async def get_design_questions(category: Optional[str] = None):
     q = {"category": category} if category else {}
     return await db.design_questions.find(q, {"_id": 0}).to_list(200)
+
+
+@api_router.get("/laws")
+async def get_laws():
+    laws = await db.laws.find({}, {"_id": 0}).sort("anno", 1).to_list(500)
+    return laws
 
 
 # =============================================================================

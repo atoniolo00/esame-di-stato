@@ -60,6 +60,14 @@ export default function LibraryScreen() {
           >
             <Icon name="bookmark" size={20} color={colors.onSurface} />
           </Pressable>
+          <Pressable
+            testID="lib-laws-btn"
+            onPress={() => router.push("/laws" as any)}
+            style={styles.headerBtn}
+            hitSlop={8}
+          >
+            <Icon name="book" size={20} color={colors.onSurface} />
+          </Pressable>
         </View>
         <ScrollView
           horizontal

@@ -8,7 +8,7 @@ Nota: sintesi di studio. Verifica sempre la normativa vigente sulle fonti uffici
 
 import seed_data
 
-CONTENT_VERSION = 3
+CONTENT_VERSION = 4
 
 CATEGORIES = seed_data.CATEGORIES
 
@@ -1100,3 +1100,273 @@ DESIGN_QUESTIONS = [
         "guida": "Distribuzione: ingresso/atrio filtro, sezioni (aule) con esposizione favorevole (sud/est) e accesso diretto al giardino, spazi comuni (refettorio, attività), servizi igienici dedicati ai bambini e per il personale/accessibili, zona cucina/sporzionamento, spazi per il personale. Requisiti: accessibilità totale (DM 236/89), sicurezza antincendio (attività scolastica soggetta: esodo, compartimentazione, REI), illuminazione e ventilazione naturali adeguate, contenimento energetico, arredi e altezze a misura di bambino, uscite di sicurezza sul giardino. Rispetta standard urbanistici e distanze.",
     },
 ]
+
+
+# =============================================================================
+# AMPLIAMENTO v4 — nuovi quiz, tracce IUAV autentiche, quesiti progettazione, LEGGI
+# =============================================================================
+EXTRA_QUESTIONS2 = [
+    # URBANISTICA
+    {"category": "urbanistica", "topic": "urbanistica-fondamenti", "question": "Quale legge del 1865 è considerata il primo riferimento sistematico su espropri e piani?",
+     "options": ["L. 2359/1865", "L. 1150/1942", "L. 765/1967", "L. 10/1977"], "correct": 0,
+     "explanation": "La L. 2359/1865 (espropriazioni per pubblica utilità e piani delle grandi città) è il primo riferimento organico; la LUF è del 1942."},
+    {"category": "urbanistica", "topic": "zone-omogenee-standard", "question": "Nelle zone residenziali la quota di standard per il verde attrezzato, gioco e sport è:",
+     "options": ["9,0 mq/ab", "4,5 mq/ab", "2,5 mq/ab", "2,0 mq/ab"], "correct": 0,
+     "explanation": "Dei 18 mq/ab: 9,0 verde/sport, 4,5 istruzione, 2,5 parcheggi, 2,0 interesse comune."},
+    {"category": "urbanistica", "topic": "zone-omogenee-standard", "question": "La zona omogenea 'E' del DM 1444/68 è destinata a:",
+     "options": ["Usi agricoli", "Centri storici", "Attrezzature generali", "Insediamenti produttivi"], "correct": 0,
+     "explanation": "La zona E è agricola; la F è per attrezzature di interesse generale, la D produttiva, la A i centri storici."},
+    {"category": "urbanistica", "topic": "piani-attuativi", "question": "Il comparto edificatorio serve principalmente a:",
+     "options": ["Consentire l'attuazione unitaria e la perequazione tra più proprietari", "Aumentare le altezze", "Eliminare gli standard", "Ridurre gli oneri"], "correct": 0,
+     "explanation": "Il comparto permette l'attuazione unitaria di un ambito con più proprietari, favorendo la perequazione."},
+    {"category": "urbanistica", "topic": "piani-attuativi", "question": "Il Piano di Recupero è introdotto dalla:",
+     "options": ["L. 457/1978", "L. 167/1962", "L. 865/1971", "L. 1150/1942"], "correct": 0,
+     "explanation": "La L. 457/1978 disciplina il recupero del patrimonio edilizio (piani di recupero e categorie d'intervento)."},
+    {"category": "urbanistica", "topic": "opere-urbanizzazione-oneri", "question": "Il contributo di costruzione è stato introdotto dalla:",
+     "options": ["L. 10/1977 (Bucalossi)", "L. 1150/1942", "L. 122/1989", "DM 1444/1968"], "correct": 0,
+     "explanation": "La legge Bucalossi (10/1977) rese onerosa l'edificazione introducendo il contributo di costruzione."},
+    {"category": "urbanistica", "topic": "vincoli-esproprio", "question": "Secondo la Corte Cost. 179/1999, la reiterazione di un vincolo espropriativo che azzera il valore:",
+     "options": ["Richiede un indennizzo", "È sempre vietata", "È gratuita e illimitata", "Converte l'area in zona A"], "correct": 0,
+     "explanation": "La reiterazione di vincoli che svuotano il valore del bene deve essere indennizzata (Corte Cost. 179/1999)."},
+    {"category": "urbanistica", "topic": "parametri-edilizi-urbanistici", "question": "Il Regolamento Edilizio Tipo (RET) che ha uniformato le definizioni è del:",
+     "options": ["2016 (Intesa Stato-Regioni)", "1942", "1968", "2001"], "correct": 0,
+     "explanation": "Il RET (Intesa Stato-Regioni 2016) ha uniformato molte definizioni urbanistico-edilizie."},
+    {"category": "urbanistica", "topic": "parametri-edilizi-urbanistici", "question": "La Superficie Territoriale (ST) rispetto alla Fondiaria (SF):",
+     "options": ["Comprende anche le aree per urbanizzazione", "È sempre minore della SF", "Coincide con la superficie coperta", "È la proiezione dell'edificio"], "correct": 0,
+     "explanation": "ST = SF + aree per opere di urbanizzazione; la SF è la parte effettivamente edificabile."},
+    {"category": "urbanistica", "topic": "urbanistica-fondamenti", "question": "La VAS (Valutazione Ambientale Strategica) si applica:",
+     "options": ["A piani e programmi con effetti sull'ambiente", "Solo ai singoli edifici", "Solo alle opere stradali", "Solo in zona sismica"], "correct": 0,
+     "explanation": "La VAS valuta gli effetti ambientali di piani e programmi (es. il PRG), a monte delle scelte."},
+    {"category": "urbanistica", "topic": "rigenerazione-consumo-suolo", "question": "La 'tolleranza costruttiva' e lo 'stato legittimo' sono stati rafforzati dal:",
+     "options": ["DL 76/2020 (Semplificazioni), che modifica il DPR 380/2001", "DM 1444/1968", "D.Lgs. 42/2004", "L. 447/1995"], "correct": 0,
+     "explanation": "Il DL Semplificazioni 76/2020 ha modificato il DPR 380/2001 introducendo tolleranze e la definizione di stato legittimo."},
+
+    # EDILIZIA
+    {"category": "edilizia", "topic": "titoli-abilitativi", "question": "La manutenzione ordinaria rientra, di regola, nell':",
+     "options": ["Edilizia libera (art. 6)", "Permesso di Costruire", "SCIA alternativa", "Ristrutturazione urbanistica"], "correct": 0,
+     "explanation": "La MO è edilizia libera: non richiede titolo, salvo eventuali autorizzazioni (es. paesaggistica)."},
+    {"category": "edilizia", "topic": "titoli-abilitativi", "question": "La segnalazione a fine lavori che attesta sicurezza, igiene e risparmio energetico è:",
+     "options": ["La SCA (agibilità)", "La CILA", "Il collaudo statico", "Il PSC"], "correct": 0,
+     "explanation": "L'agibilità (segnalazione certificata, art. 24 DPR 380/2001) attesta i requisiti dell'immobile a fine lavori."},
+    {"category": "edilizia", "topic": "titoli-abilitativi", "question": "Il restauro e risanamento conservativo è un intervento che:",
+     "options": ["Conserva l'organismo edilizio nel rispetto degli elementi tipologici", "Demolisce e ricostruisce con più volume", "Crea un organismo del tutto nuovo", "Modifica i lotti e la rete stradale"], "correct": 0,
+     "explanation": "Il restauro/risanamento conserva l'organismo edilizio assicurandone la funzionalità e rispettandone i caratteri."},
+
+    # STRUTTURE
+    {"category": "strutture", "topic": "ntc-2018-stati-limite", "question": "Per una costruzione ordinaria la vita nominale di progetto è di norma:",
+     "options": ["≥ 50 anni", "≥ 10 anni", "≥ 100 anni", "5 anni"], "correct": 0,
+     "explanation": "V_N ≥ 50 anni per le costruzioni ordinarie; ≥100 per grandi opere/strategiche; ≥10 per opere provvisorie."},
+    {"category": "strutture", "topic": "ntc-2018-stati-limite", "question": "Il coefficiente C_U per la classe d'uso IV (strategica) vale:",
+     "options": ["2,0", "1,0", "0,7", "1,5"], "correct": 0,
+     "explanation": "C_U: classe I=0,7; II=1,0; III=1,5; IV=2,0. V_R = V_N·C_U."},
+    {"category": "strutture", "topic": "materiali-predimensionamento", "question": "L'acciaio da cemento armato di uso comune è:",
+     "options": ["B450C", "S355", "C25/30", "Fe510"], "correct": 0,
+     "explanation": "B450C è l'acciaio da c.a. (f_yk 450 MPa, duttile). S355 è acciaio da carpenteria, C25/30 è il calcestruzzo."},
+    {"category": "strutture", "topic": "materiali-predimensionamento", "question": "Nel legno la resistenza al fuoco è governata soprattutto da:",
+     "options": ["La velocità di carbonizzazione", "La corrosione", "La fessurazione", "Il copriferro"], "correct": 0,
+     "explanation": "Lo strato carbonizzato protegge il nucleo: la velocità di carbonizzazione consente un dimensionamento al fuoco prevedibile."},
+
+    # SISMICA
+    {"category": "sismica", "topic": "criteri-antisismici", "question": "Le classi di duttilità previste dalle NTC sono:",
+     "options": ["CD\"A\" (alta) e CD\"B\" (media)", "Classe 1 e Classe 2", "A, B, C", "Rigida e flessibile"], "correct": 0,
+     "explanation": "Si distinguono classi di duttilità alta (CD\"A\") e media (CD\"B\"), con diverso fattore di comportamento q."},
+    {"category": "sismica", "topic": "criteri-antisismici", "question": "La regolarità in pianta riduce soprattutto gli effetti di:",
+     "options": ["Torsione", "Ritiro", "Fatica", "Corrosione"], "correct": 0,
+     "explanation": "Baricentro delle masse vicino al centro delle rigidezze → minori effetti torsionali in sisma."},
+    {"category": "sismica", "topic": "criteri-antisismici", "question": "Gli stati limite sismici di esercizio sono:",
+     "options": ["SLO e SLD", "SLV e SLC", "SLU e SLE", "EQU e STR"], "correct": 0,
+     "explanation": "Esercizio: SLO (operatività) e SLD (danno). Ultimi: SLV (salvaguardia vita) e SLC (collasso)."},
+
+    # INCENDI
+    {"category": "incendi", "topic": "prevenzione-incendi", "question": "Le attività soggette ai controlli VVF sono classificate in categorie:",
+     "options": ["A, B, C (DPR 151/2011)", "1, 2, 3", "I–VI", "REI 30/60/120"], "correct": 0,
+     "explanation": "Il DPR 151/2011 classifica le attività soggette in categorie A, B, C a rischio crescente."},
+    {"category": "incendi", "topic": "prevenzione-incendi", "question": "La 'reazione al fuoco' di un materiale riguarda:",
+     "options": ["Il suo comportamento come combustibile (euroclassi)", "La stabilità della struttura", "La tenuta ai fumi", "L'isolamento termico"], "correct": 0,
+     "explanation": "La reazione al fuoco misura il contributo del materiale all'incendio (euroclassi A1–F); la resistenza (REI) riguarda gli elementi strutturali/separanti."},
+    {"category": "incendi", "topic": "prevenzione-incendi", "question": "Il carico d'incendio specifico si misura in:",
+     "options": ["MJ/m²", "W/m²K", "dB", "mc/mq"], "correct": 0,
+     "explanation": "Il carico d'incendio specifico q_f [MJ/m²] misura l'energia dei combustibili e determina la classe del compartimento."},
+
+    # ENERGETICO
+    {"category": "energetico", "topic": "efficienza-energetica-ape", "question": "Le zone climatiche italiane vanno da:",
+     "options": ["A (più calda) a F (più fredda)", "1 a 10", "I a VI", "Nord a Sud"], "correct": 0,
+     "explanation": "Le zone climatiche A–F sono definite in gradi giorno (GG); la A è la più calda, la F la più fredda."},
+    {"category": "energetico", "topic": "efficienza-energetica-ape", "question": "L'edificio NZEB è:",
+     "options": ["A energia quasi zero", "A consumo illimitato", "Senza impianti", "Solo in classe G"], "correct": 0,
+     "explanation": "NZEB = Nearly Zero Energy Building, edificio a energia quasi zero (standard per i nuovi edifici)."},
+    {"category": "energetico", "topic": "efficienza-energetica-ape", "question": "Lo sfasamento termico dell'involucro è importante soprattutto per:",
+     "options": ["Il comfort estivo", "La resistenza al fuoco", "L'isolamento acustico", "Il calcolo sismico"], "correct": 0,
+     "explanation": "Massa e inerzia determinano lo sfasamento e l'attenuazione dell'onda termica, utili per il comfort estivo."},
+
+    # ACUSTICA
+    {"category": "acustica", "topic": "acustica-edilizia", "question": "Il parametro D2m,nT,w riguarda:",
+     "options": ["L'isolamento acustico di facciata", "Il calpestio", "Il rumore degli impianti", "Le partizioni interne"], "correct": 0,
+     "explanation": "D2m,nT,w è l'isolamento standardizzato di facciata; R'w le partizioni, L'n,w il calpestio."},
+    {"category": "acustica", "topic": "acustica-edilizia", "question": "Il pavimento galleggiante serve a migliorare:",
+     "options": ["L'isolamento al calpestio", "La resistenza al fuoco", "La trasmittanza termica", "La portanza del solaio"], "correct": 0,
+     "explanation": "Il massetto desolidarizzato su materassino resiliente riduce la trasmissione del rumore da calpestio (L'n,w)."},
+
+    # BARRIERE
+    {"category": "barriere", "topic": "barriere-architettoniche", "question": "La luce netta minima di una porta accessibile è, di norma:",
+     "options": ["80 cm", "60 cm", "120 cm", "70 cm"], "correct": 0,
+     "explanation": "La luce netta minima è 80 cm (75 cm per le porte interne in adattabilità)."},
+    {"category": "barriere", "topic": "barriere-architettoniche", "question": "La legge che disciplina gli interventi per il superamento delle barriere negli edifici privati con contributi è:",
+     "options": ["L. 13/1989", "L. 447/1995", "DM 1444/1968", "L. 122/1989"], "correct": 0,
+     "explanation": "La L. 13/1989 disciplina gli interventi e i contributi per l'abbattimento delle barriere negli edifici privati."},
+
+    # APPALTI
+    {"category": "appalti", "topic": "codice-appalti", "question": "Il criterio OEPV è obbligatorio per:",
+     "options": ["I servizi di ingegneria e architettura sopra soglia", "Tutti i lavori standardizzati", "Le sole forniture", "Gli affidamenti diretti"], "correct": 0,
+     "explanation": "L'OEPV è obbligatoria per i servizi di ingegneria/architettura e per i servizi ad alta intensità di manodopera."},
+    {"category": "appalti", "topic": "codice-appalti", "question": "Nel sottosoglia è previsto il principio di:",
+     "options": ["Rotazione degli affidamenti", "Aggiudicazione al massimo ribasso obbligatorio", "Esclusione della concorrenza", "Nomina diretta del collaudatore"], "correct": 0,
+     "explanation": "Nel sottosoglia vige il principio di rotazione degli inviti e degli affidamenti per garantire concorrenza."},
+    {"category": "appalti", "topic": "codice-appalti", "question": "I CAM nei contratti pubblici sono:",
+     "options": ["Criteri Ambientali Minimi", "Codici di Appalto Misto", "Commissioni di Aggiudicazione", "Contratti di Appalto Modulari"], "correct": 0,
+     "explanation": "I Criteri Ambientali Minimi (CAM) impongono requisiti di sostenibilità negli acquisti e nei lavori pubblici."},
+
+    # CATASTO
+    {"category": "catasto", "topic": "catasto-estimo", "question": "Il valore di trasformazione è usato tipicamente per:",
+     "options": ["Le aree edificabili", "Le rendite agrarie", "I soli beni di lusso", "Gli arredi"], "correct": 0,
+     "explanation": "Valore di trasformazione = valore del prodotto finito meno i costi di trasformazione; tipico delle aree edificabili."},
+    {"category": "catasto", "topic": "catasto-estimo", "question": "La categoria catastale 'A' identifica:",
+     "options": ["Le abitazioni", "I box e i negozi", "Gli opifici", "Le aree urbane"], "correct": 0,
+     "explanation": "A = abitazioni; C = box/negozi; D = speciali (opifici); F = fittizie (aree urbane, fabbricati in corso)."},
+    {"category": "catasto", "topic": "catasto-estimo", "question": "Il principio dell'ordinarietà in estimo significa riferirsi:",
+     "options": ["Al comportamento medio del mercato", "Al caso più favorevole", "Al valore minimo possibile", "Al solo costo storico"], "correct": 0,
+     "explanation": "La stima si basa sul comportamento ordinario/medio degli operatori di mercato (principio dell'ordinarietà)."},
+
+    # PROFESSIONE
+    {"category": "professione", "topic": "professione-deontologia", "question": "L'assicurazione RC professionale obbligatoria è prevista dal:",
+     "options": ["DPR 137/2012", "DM 1444/1968", "D.Lgs. 36/2023", "DPR 380/2001"], "correct": 0,
+     "explanation": "Il DPR 137/2012 (riforma professioni) ha reso obbligatoria l'assicurazione RC e la formazione continua."},
+    {"category": "professione", "topic": "professione-deontologia", "question": "La sezione B dell'Albo (architetto iunior) consente di norma:",
+     "options": ["Opere di modesta complessità con metodologie standardizzate", "Qualsiasi opera senza limiti", "Solo attività di cantiere", "Solo restauro di beni tutelati"], "correct": 0,
+     "explanation": "La sezione B è abilitata a opere di modesta complessità e standardizzate; il restauro di beni tutelati è riservato agli architetti sez. A."},
+    {"category": "professione", "topic": "sicurezza-cantieri", "question": "Il PiMUS riguarda:",
+     "options": ["Montaggio, uso e smontaggio dei ponteggi", "Il piano energetico", "Il collaudo statico", "La zonizzazione acustica"], "correct": 0,
+     "explanation": "Il PiMUS (Piano di Montaggio, Uso e Smontaggio) è specifico per i ponteggi (D.Lgs. 81/2008)."},
+    {"category": "professione", "topic": "sicurezza-cantieri", "question": "Il fascicolo dell'opera contiene informazioni utili:",
+     "options": ["Alla sicurezza nelle manutenzioni future", "Al calcolo degli oneri", "Alla stima catastale", "All'APE"], "correct": 0,
+     "explanation": "Il fascicolo dell'opera raccoglie informazioni per la sicurezza negli interventi di manutenzione successivi."},
+
+    # COSTRUTTIVI
+    {"category": "costruttivi", "topic": "elementi-costruttivi", "question": "La trave rovescia è una fondazione:",
+     "options": ["Diretta che collega più pilastri", "Profonda su pali", "A sola punta", "Sospesa"], "correct": 0,
+     "explanation": "La trave rovescia è una fondazione diretta che collega più pilastri, utile su terreni meno uniformi e in sisma."},
+    {"category": "costruttivi", "topic": "elementi-costruttivi", "question": "La parete ventilata si caratterizza per:",
+     "options": ["Un'intercapedine ventilata dietro il rivestimento", "L'assenza di isolante", "Una guaina a vista", "Il doppio vetro"], "correct": 0,
+     "explanation": "La parete ventilata ha un'intercapedine d'aria dietro il rivestimento che migliora prestazioni e durabilità e riduce i carichi termici."},
+    {"category": "costruttivi", "topic": "elementi-costruttivi", "question": "Nel 'tetto rovescio' l'isolante è posto:",
+     "options": ["Sopra l'impermeabilizzazione", "Sotto la barriera al vapore", "All'interno del solaio", "A contatto col terreno"], "correct": 0,
+     "explanation": "Nel tetto rovescio l'isolante (non igroscopico) è sopra la guaina impermeabile, che risulta così protetta termicamente."},
+]
+
+EXTRA_DESIGN = [
+    {
+        "category": "urbanistica",
+        "titolo": "Scuola elementare (tema reale IUAV 2024, Sez. A)",
+        "prompt": "Progettare una piccola scuola elementare di 5 aule (max 25 alunni per aula), su 2 livelli, con mensa. Lotto pianeggiante 50×100 m: a sud e ovest un parco pubblico, a nord una strada di quartiere, a est una casa bifamiliare a 10 m dal confine. Gli spazi interni devono essere flessibili (eventi musicali/teatrali, incontri, feste), con forte relazione interno-esterno. Richiesti: planimetria 1:200, piante/prospetti/sezioni 1:100, dettaglio 1:20, nota strutturale.",
+        "guida": "Impostazione: orienta le aule a sud/est verso il parco, posiziona accessi pedonali e carrabili su strada a nord, separa il flusso bambini dalla viabilità. Schema: atrio/ingresso filtro, 5 aule flessibili (pareti mobili per la sala eventi), mensa con cucina, servizi a misura di bambino e accessibili (DM 236/89), spazi per il personale. Verifica: distanza 10 m dalla bifamiliare (DM 1444), standard e parcheggi, sicurezza antincendio scolastica (esodo, compartimentazione, REI), illuminazione/ventilazione naturali, contenimento energetico. Dettaglio 1:20 coerente con la tecnologia scelta (es. telaio in c.a. o struttura mista) e stratigrafia dell'involucro.",
+    },
+    {
+        "category": "urbanistica",
+        "titolo": "Padiglione espositivo (tema reale IUAV 2024, Sez. A)",
+        "prompt": "Progettare un padiglione espositivo con piccola sala conferenze vicino alla stazione di una grande città, su lotto pianeggiante di 1000 mq. Due livelli, ~400 mq ciascuno, per reperti archeologici e mostre temporanee. Oltre all'esposizione: atrio con biglietteria e guardaroba, auditorium, amministrazione, magazzino, servizi igienici, bar. Accessibilità per tutti. Richiesti: planimetria 1:200 (parcheggi e verde), piante/prospetti/sezioni 1:100, dettaglio 1:20, nota strutturale.",
+        "guida": "Impostazione: sfrutta la prossimità alla stazione per gli accessi pubblici; prevedi grandi luci libere per l'esposizione (es. struttura a telaio/travi reticolari o solai a piastra) e un percorso espositivo chiaro su due livelli con collegamenti accessibili (ascensore, rampe 8%). Funzioni: atrio-biglietteria-guardaroba all'ingresso, auditorium con uscite di sicurezza, depositi/magazzino con accesso di servizio, servizi igienici accessibili, bar. Verifica: accessibilità totale (DM 236/89), antincendio (affollamento, esodo, SEFC), illuminazione museale controllata, standard a parcheggio e verde attrezzato. Dettaglio 1:20 su un nodo significativo (es. facciata/copertura) con stratigrafia e tecnologia.",
+    },
+]
+
+EXTRA_TRACCE = [
+    {
+        "sezione": "Sezione A – Architettura",
+        "tipo": "Prova pratica (tema reale)",
+        "sessione": "II sessione 2024 (14 novembre 2024) – II busta",
+        "titolo": "Scuola elementare di 5 aule con mensa",
+        "testo": "Progettare una piccola scuola elementare di 5 aule (max 25 alunni per aula), distribuita su 2 livelli e dotata di mensa. Lotto pianeggiante largo 50 m e profondo 100 m: a sud e ovest un parco pubblico, a nord una strada di quartiere urbana, a est una casa bifamiliare a 10 m dal confine. Gli spazi interni dovranno essere flessibili per eventi musicali e teatrali, incontri formativi e feste, con forte relazione interno-esterno. Richiesti: planimetria generale 1:200 (parcheggi, accessi pedonali e carrabili), piante/prospetti/sezioni 1:100, dettaglio architettonico-costruttivo 1:20, breve descrizione della soluzione strutturale.",
+        "suggerimenti": "Orienta le aule verso il parco, separa i flussi, rispetta i 10 m dal confine edificato (DM 1444), cura accessibilità (DM 236/89), antincendio scolastico ed esodo, e coerenza del dettaglio 1:20 con la tecnologia scelta.",
+    },
+    {
+        "sezione": "Sezione A – Architettura",
+        "tipo": "Prova pratica (tema reale)",
+        "sessione": "II sessione 2024 – II busta",
+        "titolo": "Padiglione espositivo con sala conferenze",
+        "testo": "Progettare un padiglione espositivo con una piccola sala conferenze vicino alla stazione ferroviaria di una grande città, su lotto pianeggiante di 1000 mq. Due livelli di circa 400 mq ciascuno, per esposizione di reperti archeologici e mostre temporanee. Ambienti: atrio con biglietteria e guardaroba, auditorium, amministrazione, magazzino, servizi igienici, bar. Accessibilità per tutti. Richiesti: planimetria 1:200 (parcheggi e verde), piante/prospetti/sezioni 1:100, dettaglio 1:20, breve descrizione strutturale.",
+        "suggerimenti": "Prevedi grandi luci libere per l'esposizione, percorso chiaro su due livelli, accessibilità totale (ascensore/rampe), antincendio per affollamento e uscite, standard a parcheggio e verde.",
+    },
+]
+
+# =============================================================================
+# LEGGI E NORMATIVE — scheda riepilogativa (data, numero, apporto)
+# =============================================================================
+LAWS = [
+    {"anno": 1865, "numero": "L. 2359/1865", "titolo": "Legge sulle espropriazioni per pubblica utilità", "categoria": "urbanistica",
+     "apporto": "Primo riferimento sistematico su espropri e piani regolatori delle grandi città."},
+    {"anno": 1942, "numero": "L. 1150/1942", "titolo": "Legge Urbanistica Fondamentale", "categoria": "urbanistica",
+     "apporto": "Istituisce il sistema dei piani (PRG, piani particolareggiati); è la legge urbanistica base, tuttora vigente."},
+    {"anno": 1962, "numero": "L. 167/1962", "titolo": "Edilizia Economica e Popolare (PEEP)", "categoria": "urbanistica",
+     "apporto": "Introduce i piani per l'edilizia economica e popolare con possibilità di esproprio e assegnazione aree."},
+    {"anno": 1967, "numero": "L. 765/1967", "titolo": "Legge ponte", "categoria": "urbanistica",
+     "apporto": "Rende obbligatorio il PRG, introduce la licenza edilizia e rinvia agli standard."},
+    {"anno": 1968, "numero": "DM 1444/1968", "titolo": "Zone omogenee e standard urbanistici", "categoria": "urbanistica",
+     "apporto": "Definisce zone A–F, standard minimi (18 mq/ab) e limiti inderogabili di densità, altezza e distanze (10 m)."},
+    {"anno": 1971, "numero": "L. 865/1971", "titolo": "Legge sulla casa (PIP)", "categoria": "urbanistica",
+     "apporto": "Disciplina gli espropri per edilizia pubblica e i Piani per gli Insediamenti Produttivi (PIP)."},
+    {"anno": 1977, "numero": "L. 10/1977 (Bucalossi)", "titolo": "Edificabilità dei suoli", "categoria": "urbanistica",
+     "apporto": "Rende onerosa l'edificazione: introduce il contributo di costruzione; separa ius aedificandi e proprietà."},
+    {"anno": 1978, "numero": "L. 457/1978", "titolo": "Norme per il recupero edilizio", "categoria": "edilizia",
+     "apporto": "Definisce le categorie di intervento e i piani di recupero del patrimonio edilizio esistente."},
+    {"anno": 1985, "numero": "L. 47/1985", "titolo": "Condono e sanzioni edilizie", "categoria": "edilizia",
+     "apporto": "Primo condono edilizio e disciplina organica delle sanzioni per gli abusi."},
+    {"anno": 1985, "numero": "L. 431/1985 (Galasso)", "titolo": "Tutela delle bellezze naturali", "categoria": "urbanistica",
+     "apporto": "Estende i vincoli paesaggistici per legge a vaste categorie di territorio (coste, fiumi, montagne)."},
+    {"anno": 1989, "numero": "L. 13/1989", "titolo": "Barriere architettoniche (edifici privati)", "categoria": "barriere",
+     "apporto": "Interventi e contributi per il superamento delle barriere negli edifici privati."},
+    {"anno": 1989, "numero": "DM 236/1989", "titolo": "Prescrizioni accessibilità", "categoria": "barriere",
+     "apporto": "Definisce accessibilità, visitabilità e adattabilità e i parametri dimensionali (rampe 8%, Ø 150 cm, porte 80 cm)."},
+    {"anno": 1989, "numero": "L. 122/1989 (Tognoli)", "titolo": "Parcheggi pertinenziali", "categoria": "urbanistica",
+     "apporto": "Dotazione di 1 mq di parcheggio ogni 10 mc di costruzione, anche in deroga agli strumenti urbanistici."},
+    {"anno": 1994, "numero": "L. 109/1994 (Merloni)", "titolo": "Legge quadro sui lavori pubblici", "categoria": "appalti",
+     "apporto": "Prima disciplina organica dei lavori pubblici (poi superata dai Codici del 2006, 2016 e 2023)."},
+    {"anno": 1995, "numero": "L. 447/1995", "titolo": "Legge quadro inquinamento acustico", "categoria": "acustica",
+     "apporto": "Quadro generale sull'inquinamento acustico; base della zonizzazione acustica comunale."},
+    {"anno": 1996, "numero": "DPR 503/1996", "titolo": "Barriere architettoniche (edifici pubblici)", "categoria": "barriere",
+     "apporto": "Accessibilità di edifici, spazi e servizi pubblici."},
+    {"anno": 1997, "numero": "DPCM 5/12/1997", "titolo": "Requisiti acustici passivi", "categoria": "acustica",
+     "apporto": "Fissa i requisiti acustici passivi degli edifici (R'w, D2m,nT,w, L'n,w, impianti)."},
+    {"anno": 2001, "numero": "DPR 380/2001", "titolo": "Testo Unico dell'Edilizia", "categoria": "edilizia",
+     "apporto": "Raccoglie categorie di intervento e titoli abilitativi (PdC, SCIA, CILA, edilizia libera) e le sanzioni."},
+    {"anno": 2001, "numero": "DPR 327/2001", "titolo": "T.U. espropriazione per pubblica utilità", "categoria": "urbanistica",
+     "apporto": "Disciplina organica dell'esproprio: vincolo, dichiarazione di pubblica utilità, indennità, decreto."},
+    {"anno": 2001, "numero": "L. cost. 3/2001", "titolo": "Riforma del Titolo V", "categoria": "urbanistica",
+     "apporto": "Introduce il 'governo del territorio' come materia concorrente Stato–Regioni."},
+    {"anno": 2003, "numero": "OPCM 3274/2003", "titolo": "Classificazione sismica", "categoria": "sismica",
+     "apporto": "Riclassifica l'intero territorio nazionale in 4 zone sismiche."},
+    {"anno": 2004, "numero": "D.Lgs. 42/2004 (Urbani)", "titolo": "Codice dei beni culturali e del paesaggio", "categoria": "urbanistica",
+     "apporto": "Disciplina tutela e valorizzazione dei beni culturali e del paesaggio; autorizzazione paesaggistica."},
+    {"anno": 2005, "numero": "D.Lgs. 192/2005", "titolo": "Rendimento energetico in edilizia", "categoria": "energetico",
+     "apporto": "Recepisce la direttiva EPBD; base dell'efficienza energetica, dell'APE e del concetto di NZEB."},
+    {"anno": 2008, "numero": "D.Lgs. 81/2008", "titolo": "Testo Unico sicurezza sul lavoro", "categoria": "professione",
+     "apporto": "Titolo IV sui cantieri: coordinatori CSP/CSE, PSC, POS, PiMUS, fascicolo dell'opera."},
+    {"anno": 2008, "numero": "NTC 2008 → 2018", "titolo": "Norme Tecniche per le Costruzioni", "categoria": "strutture",
+     "apporto": "Metodo semiprobabilistico agli stati limite; le NTC 2018 (DM 17/1/2018) sono la versione vigente."},
+    {"anno": 2012, "numero": "DL 1/2012 e L. 27/2012", "titolo": "Liberalizzazioni", "categoria": "professione",
+     "apporto": "Abrogano le tariffe professionali minime obbligatorie; obbligo di preventivo al cliente."},
+    {"anno": 2015, "numero": "DM 3/8/2015", "titolo": "Codice di Prevenzione Incendi", "categoria": "incendi",
+     "apporto": "Introduce l'approccio prestazionale e le misure antincendio (S.1–S.10), con la sigla REI."},
+    {"anno": 2015, "numero": "DM 26/6/2015", "titolo": "Requisiti minimi / NZEB", "categoria": "energetico",
+     "apporto": "Definisce i requisiti minimi di prestazione energetica e l'edificio a energia quasi zero."},
+    {"anno": 2018, "numero": "DM 17/1/2018", "titolo": "NTC 2018", "categoria": "strutture",
+     "apporto": "Norme Tecniche vigenti: stati limite, azioni, vita nominale, classi d'uso, criteri antisismici."},
+    {"anno": 2020, "numero": "DL 76/2020 (Semplificazioni)", "titolo": "Semplificazioni edilizie", "categoria": "edilizia",
+     "apporto": "Modifica il DPR 380/2001: stato legittimo, tolleranze costruttive, demo-ricostruzione più ampia."},
+    {"anno": 2021, "numero": "D.Lgs. 199/2021", "titolo": "Fonti rinnovabili (RED II)", "categoria": "energetico",
+     "apporto": "Impone quote minime di energia rinnovabile nei nuovi edifici e nelle ristrutturazioni rilevanti."},
+    {"anno": 2023, "numero": "D.Lgs. 36/2023", "titolo": "Nuovo Codice dei Contratti Pubblici", "categoria": "appalti",
+     "apporto": "Sostituisce il D.Lgs. 50/2016; principi di risultato, fiducia e accesso; due livelli di progetto (PFTE ed esecutivo)."},
+]
+
+ALL_QUESTIONS = ALL_QUESTIONS + EXTRA_QUESTIONS2
+DESIGN_QUESTIONS = DESIGN_QUESTIONS + EXTRA_DESIGN
+TRACCE = TRACCE + EXTRA_TRACCE

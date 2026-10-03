@@ -291,3 +291,87 @@ class TestIteration2:
         assert "content" in t and len(t["content"]) > 500, f"content too short for {slug}"
         assert "key_points" in t and len(t["key_points"]) >= 3
 
+
+
+# ---- Iteration 3: Laws + expanded quiz pool + authentic IUAV content ----
+class TestIteration3:
+    def test_laws_list(self, s):
+        r = s.get(f"{API}/laws")
+        assert r.status_code == 200
+        laws = r.json()
+        assert isinstance(laws, list)
+        assert len(laws) == 32, f"expected 32 laws, got {len(laws)}"
+        # Required fields
+        for law in laws:
+            assert set(["lid", "anno", "numero", "titolo", "categoria", "apporto"]).issubset(law.keys())
+            assert isinstance(law["anno"], int)
+            assert isinstance(law["apporto"], str) and len(law["apporto"]) > 10
+        # Sorted by anno ascending
+        years = [law["anno"] for law in laws]
+        assert years == sorted(years), "laws not sorted by anno asc"
+
+    def test_laws_contains_key_norms(self, s):
+        r = s.get(f"{API}/laws")
+        laws = r.json()
+        numeri = " | ".join(l["numero"] for l in laws)
+        for needle in ["1150/1942", "1444/1968", "380/2001", "36/2023"]:
+            assert needle in numeri, f"missing norm {needle} in /api/laws"
+
+    def test_categories_total_expanded(self, s):
+        r = s.get(f"{API}/categories")
+        cats = r.json()
+        total = sum(c["question_count"] for c in cats)
+        assert total >= 100, f"expected >=100 total questions, got {total}"
+        urb = next(c for c in cats if c["slug"] == "urbanistica")
+        assert urb["question_count"] >= 35, f"urbanistica count low: {urb['question_count']}"
+
+    def test_quiz_urbanistica_20(self, s):
+        r = s.get(f"{API}/quiz?category=urbanistica&limit=20")
+        assert r.status_code == 200
+        qs = r.json()
+        assert len(qs) == 20
+        for q in qs:
+            assert q["category"] == "urbanistica"
+            assert len(q["options"]) == 4
+
+    def test_simulation_40(self, s):
+        r = s.get(f"{API}/quiz/simulation?count=40")
+        assert r.status_code == 200
+        qs = r.json()
+        assert len(qs) == 40
+        # unique ids
+        assert len({q["qid"] for q in qs}) == 40
+
+    def test_submit_still_works(self, s):
+        r = s.get(f"{API}/quiz?category=urbanistica&limit=1")
+        q = r.json()[0]
+        payload = {"device_id": DEVICE_ID, "question_id": q["qid"], "selected_index": q["correct"]}
+        sub = s.post(f"{API}/quiz/submit", data=json.dumps(payload))
+        assert sub.status_code == 200
+        data = sub.json()
+        assert data["correct"] is True
+        assert data["correct_index"] == q["correct"]
+        # wrong answer -> mistake stored
+        wrong_idx = (q["correct"] + 1) % 4
+        payload2 = {"device_id": DEVICE_ID, "question_id": q["qid"], "selected_index": wrong_idx}
+        sub2 = s.post(f"{API}/quiz/submit", data=json.dumps(payload2))
+        assert sub2.status_code == 200
+        assert sub2.json()["correct"] is False
+
+    def test_tracce_count_and_iuav(self, s):
+        r = s.get(f"{API}/tracce")
+        assert r.status_code == 200
+        ts = r.json()
+        assert len(ts) == 8, f"expected 8 tracce, got {len(ts)}"
+        titles = " | ".join(t["titolo"].lower() for t in ts)
+        assert "scuola elementare" in titles and "5 aule" in titles
+        assert ("padiglione espositivo" in titles) or ("sala conferenze" in titles)
+
+    def test_design_questions_count_and_iuav(self, s):
+        r = s.get(f"{API}/design-questions")
+        assert r.status_code == 200
+        dq = r.json()
+        assert len(dq) == 8, f"expected 8 design questions, got {len(dq)}"
+        for d in dq:
+            assert set(["did", "categoria" if "categoria" in d else "category", "titolo", "prompt", "guida"]).intersection(d.keys())
+            assert d["titolo"] and d["prompt"] and d["guida"]
