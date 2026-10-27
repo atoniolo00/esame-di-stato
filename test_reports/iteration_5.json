@@ -1,0 +1,43 @@
+{
+  "summary": "Iteration 5 retest of the iteration 4 fixes. Backend: 56/57 pytest PASS. 6 new TestIteration5 tests were added; AI quiz generation and tutor tests also pass. 156 seed questions now have their options shuffled, and the correct-answer positions across indices 0/1/2/3 are 40/35/45/36. Answering 'always A' scores about 26-30%: 3/10 in the UI quiz and 3/10 in the simulation. POST /api/quiz/submit and the simulation both grade against the shuffled index, and the UI-highlighted correct option matched the API in 10/10 cases. New mistakes flow: a wrong answer gives live-aligned options in /quiz/mistakes, and a correct answer clears the mistake. FAILED: the realignment of pre-existing mistakes did not take effect, so 22 of 23 legacy seed mistakes in the DB still have the old option order and correct index (RCA below). Frontend (390x844) all PASS: the review-mistakes-cta is styled (bg rgb(192,90,70), height 52, white Satoshi-Bold text, white Feather icon) and navigates to /quiz/errori. Answering 2 of 2 mistakes correctly leads to 100%, 'Rifai il quiz' refetches and shows the 'Nessun errore da ripassare' empty state, and the progress screen updates. Studia hides the normativa and attualita chips, and every remaining chip has topics. The Flashcard segment hides them with no '0 carte', while the Quiz segment still shows them. Law chips are 44px tall, the laws screen starts with the Urbanistica group, and /laws?focus=L. 1150/1942 auto-expands. Regression of home, tutor, search, favorites, flashcards, tracce, design and the normal quiz retry passed with no page errors. New bug: a race condition in ensureDeviceId creates 2 device IDs on first launch. No deprecated Expo packages detected.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "seed_database (mistakes realignment) / GET /api/quiz/mistakes", "issue": "22 of 23 existing seed mistakes were not realigned. Their options/correct are in the old pre-shuffle order while db.questions is shuffled. /api/quiz/mistakes returns the stale mistake doc, so the user picks the displayed correct option and submit marks it wrong. The UI then highlights correct_index (new order) over the stale option list, which shows a wrong answer as 'correct'. Reproduced: device test-device-1dd0c1dc, seed-14, mistake options ['Adeguamento','Miglioramento',...] with correct=0. Submitting 0 returned correct:false, correct_index:1.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "AI-generated questions (/api/quiz/generate)", "issue": "Not shuffled server-side, so they rely on the LLM's choice of correct index. The current 8 AI questions are reasonably spread (0:1, 1:4, 2:3), but consider shuffling them on insert too."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "src/api.ts ensureDeviceId", "issue": "Race condition on first launch. The progress and mistakes queries call ensureDeviceId concurrently, both find no cached id, and each generates a different id. Observed: dev_1793050554477_07h2rkdr and dev_1793050554477_wnqgfrpv in the same session; after reload only one survives. Anything recorded under the other id in the first session is lost.", "testID": "n/a", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [
+      {"flow": "Legacy mistakes review", "issue": "See backend critical issue: stale mistake options cause correct answers to be graded wrong in /quiz/errori for users with pre-v6 mistakes.", "affected_testIDs": ["quiz-option-0", "quiz-option-1", "quiz-option-2", "quiz-option-3"]}
+    ],
+    "design_issues": [
+      {"screen": "laws", "issues": ["The count text '1 norme in 1 aree' is ungrammatical in the singular. Use 'norma'/'area' when the count is 1."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/iteration_5_results.xml"],
+  "action_items": [
+    "HIGH: Re-run the mistakes realignment. The v6 seed ran when content.py changed (log 21:29:46), and the realignment block was likely added to server.py afterwards, so it never executed because version==6. Bump CONTENT_VERSION to 7: the shuffle is deterministic (Random(qid)) and text-based selected_index remapping is idempotent, so this is safe. Better still, make GET /api/quiz/mistakes read options/correct/explanation from the live db.questions doc (by qid) instead of the copy in the mistake doc, so future content edits cannot desync it.",
+    "MEDIUM: Fix the ensureDeviceId race in src/api.ts by memoizing the in-flight promise (let pending: Promise<string>|null; if (!pending) pending = (async () => {...})(); return pending).",
+    "LOW: Shuffle options for AI-generated questions in /api/quiz/generate before insert.",
+    "LOW: Use singular forms in laws.tsx when the count is 1 ('norma', 'area')."
+  ],
+  "critical_code_review_comments": [
+    "server.py get_mistakes_quiz returns denormalized question data from the mistakes collection, which goes stale whenever seed content changes. This is the root of the HIGH bug; it should join against db.questions.",
+    "server.py seed realignment loop only runs when the version changes, so a code-only change to the migration does nothing. Version bumps must accompany migration code.",
+    "backend_test.py BASE_URL keeps a hardcoded fallback URL (pre-existing). It should rely solely on the env var.",
+    "seed_database runs one awaited update per question (N+1). Acceptable at the current size; bulk_write would be faster."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py (added TestIteration5)"],
+  "success_rate": {"backend": "98% (56/57)", "frontend": "100% of requested UI fixes verified (1 new MEDIUM race bug found)"},
+  "seed_data_creation": "Created TEST_it5-* devices plus a few dev_* browser devices with mistakes/attempts via API. One wrong submit on legacy device test-device-1dd0c1dc seed-14 realigned that single mistake.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run pytest -k TestIteration5. test_existing_mistakes_aligned_with_questions reads Mongo directly via pymongo using backend/.env, and should pass after the CONTENT_VERSION bump or the live-join fix. The web device_id is stored via AsyncStorage (IndexedDB), not plain localStorage. To get a stable id in Playwright, load the page, reload, then capture device_id from request URLs.",
+  "rca_of_issue": "Backend log: 'Seeded content v6' at 21:29:46 on a content.py reload, followed by several server.py reloads. The mistake-realignment code was evidently not part of that run. meta.version is now 6, so seed_database returns early and the migration never ran. DB check: 22 of 23 seed mistakes have options/correct that differ from db.questions while the question text is identical. Mitigation: bump the version, or derive the mistakes quiz from live questions."
+}

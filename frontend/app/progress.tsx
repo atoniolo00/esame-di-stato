@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
@@ -9,6 +10,7 @@ import { fonts, makeStyles, radius, spacing, useTheme } from "@/src/theme";
 export default function ProgressScreen() {
   const styles = useStyles();
   const { colors } = useTheme();
+  const router = useRouter();
 
   const progressQ = useQuery({ queryKey: ["progress"], queryFn: getProgress });
   const mistakesQ = useQuery({ queryKey: ["mistakes"], queryFn: getMistakes });
@@ -97,7 +99,16 @@ export default function ProgressScreen() {
           {mistakes.length === 0 ? (
             <Text style={styles.sectionSub}>Nessun errore da ripassare. Ottimo lavoro!</Text>
           ) : (
-            mistakes.map((m) => {
+            <>
+              <Pressable
+                testID="review-mistakes-cta"
+                style={styles.reviewCta}
+                onPress={() => router.push("/quiz/errori" as any)}
+              >
+                <Icon name="refresh-cw" size={18} color={colors.onBrandPrimary} />
+                <Text style={styles.reviewCtaText}>Allenati sui tuoi {mistakes.length} errori</Text>
+              </Pressable>
+              {mistakes.map((m) => {
               const expanded = open === m.question_id;
               return (
                 <Pressable
@@ -125,7 +136,8 @@ export default function ProgressScreen() {
                   ) : null}
                 </Pressable>
               );
-            })
+            })}
+            </>
           )}
         </View>
       </ScrollView>
@@ -160,6 +172,18 @@ const useStyles = makeStyles((colors) => ({
   weakPct: { fontFamily: fonts.medium, fontSize: 14, color: colors.onSurfaceTertiary },
   weakTrack: { height: 8, backgroundColor: colors.surfaceTertiary, borderRadius: radius.pill, overflow: "hidden" },
   weakFill: { height: 8, borderRadius: radius.pill },
+  reviewCta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sm,
+    minHeight: 52,
+    backgroundColor: colors.brandPrimary,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.lg,
+    marginVertical: spacing.sm,
+  },
+  reviewCtaText: { fontFamily: fonts.bold, fontSize: 15, color: colors.onBrandPrimary },
   mistake: {
     backgroundColor: colors.surfaceSecondary,
     borderRadius: radius.lg,

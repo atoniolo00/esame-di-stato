@@ -1,0 +1,47 @@
+{
+  "summary": "Iteration 4 testing of ArchEsame. Backend: 51/51 pytest PASS (10 new tests in TestIteration4, plus regressions and the AI quiz-generation/tutor tests). /api/laws returns 32 laws in 10 topic areas, each with a 'dettaglio' explanation. New categories 'normativa' (18 questions) and 'attualita' (14 questions, including Olympics 2026 and Villaggio Olimpico) work with /api/quiz. Every topic except elementi-costruttivi has related_laws (law 'numero' strings), and all of them match a law in /api/laws. The mistakes flow works: a wrong answer creates one mistake per question (no duplicates), /api/mistakes and /api/quiz/mistakes return them, progress.open_mistakes counts them, a later correct answer removes them, and the endpoints return 422 without device_id. Frontend (390x844): the Laws screen groups laws by area and tapping a card expands its explanation. Topic law chips navigate to /laws?focus=<numero> and pre-filter the list. Practice shows the Normativa and Attualità quizzes and the full 10-question flow reaches the result screen. Progress -> 'Allenati sui tuoi N errori' -> /quiz/errori: 3 mistakes made, all cleared after correct answers, and the progress screen updated. Home/Studia/Esercitati/Tutor tabs and the simulation screen render with no page errors. Main problems: (1) 157 of 164 quiz questions have the correct answer at index 0 and nothing shuffles the options, so 'always pick A' scores about 96%. (2) The review-mistakes button has no styles. (3) The new categories show empty screens in Library and Flashcards. (4) Older-exam questions are mixed into existing categories with no visible label. No deprecated Expo packages detected.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "GET /api/quiz, /api/quiz/simulation (content.py seed data)", "issue": "157 of 164 questions have correct=0: every question in normativa, attualita, energetico, strutture, appalti and the other categories, and 40 of 47 in urbanistica. Neither backend nor frontend shuffles the options, so the right answer is almost always the first option. This undermines the quiz and the exam simulation.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "Older exam quizzes", "issue": "EXTRA_QUESTIONS3 ('Domande ispirate a prove meno recenti') are mixed into existing categories with no source/year/session field. Users cannot see or pick 'older exam' questions, and /api/tracce still only has 2024 sessions."},
+      {"endpoint": "GET /api/topics/state-exam-master", "issue": "Returns 404 because 'state-exam-master' is the preview host name, not a topic slug. related_laws were verified on the real slugs (e.g. urbanistica-fondamenti)."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "progress.tsx 'Ripassa gli errori' CTA", "issue": "styles.reviewCta and styles.reviewCtaText are used (lines 105, 109) but never defined in useStyles. The button renders unstyled: no background, black system-font text, and the white refresh-cw icon is invisible on the light background.", "testID": "review-mistakes-cta", "priority": "HIGH"},
+      {"component": "Library category chips", "issue": "The 'Normativa' and 'Attualità e temi' chips appear in Studia but have 0 topics. Selecting them shows a completely blank list with no empty state.", "testID": "lib-chip-normativa / lib-chip-attualita", "priority": "MEDIUM"},
+      {"component": "Practice > Flashcard segment", "issue": "Normativa and Attualità are listed with '0 carte' and open the empty 'Nessuna flashcard' screen.", "testID": "practice-cat-normativa (flash mode)", "priority": "LOW"},
+      {"component": "quiz/[category].tsx mistakes mode retry", "issue": "After all mistakes are answered correctly, 'Rifai il quiz' calls resetWith(quizQ.data) with stale cached data, so the already-cleared mistakes are replayed. It should refetch (quizQ.refetch()), or the ['quiz','errori'] query should be invalidated on submit.", "testID": "quiz-retry", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "topic/[slug]", "issues": ["The related-law chips are 35px tall, below the 44px minimum touch target. Increase paddingVertical or add hitSlop."]},
+      {"screen": "laws", "issues": ["Groups are sorted alphabetically by slug, so Acustica comes first. The app focuses on urban planning, so put Urbanistica first or order by importance.", "When opened from a chip with a focus param and exactly one law matches, it is not auto-expanded, so the user needs an extra tap to see the explanation."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/iteration_4_results.xml"],
+  "action_items": [
+    "HIGH: Randomize the correct-answer position. Either shuffle the options at seed time in content.py (remap 'correct'), or shuffle per request in /api/quiz, /api/quiz/simulation and /api/quiz/mistakes while keeping /api/quiz/submit consistent. Simplest: rebalance the seeds and bump CONTENT_VERSION.",
+    "HIGH: Add the reviewCta and reviewCtaText styles in /app/frontend/app/progress.tsx useStyles, e.g. reviewCta: {flexDirection:'row', alignItems:'center', justifyContent:'center', gap: spacing.sm, backgroundColor: colors.brandPrimary, borderRadius: radius.lg, paddingVertical: spacing.md} and reviewCtaText: {fontFamily: fonts.bold, fontSize: 15, color: colors.onBrandPrimary}.",
+    "MEDIUM: In library.tsx, hide categories with topic_count === 0, or make the Normativa chip route to /laws and show an EmptyState. In practice.tsx flash mode, hide categories with flashcard_count === 0.",
+    "MEDIUM: Make the 'older exam quizzes' visible. Add a source/sessione field (e.g. 'Prova 2019') to EXTRA_QUESTIONS3 and show a tag in the quiz UI or a dedicated practice entry.",
+    "LOW: In mistakes mode, have 'Rifai il quiz' refetch the mistakes. Make law chips at least 44px tall. Auto-expand the focused law when it is the only match."
+  ],
+  "critical_code_review_comments": [
+    "server.py submit_answer: the mistakes upsert/delete logic is correct and idempotent (keyed on device_id + question_id). The /api/quiz/mistakes projection excludes _id.",
+    "/api/quiz/mistakes always returns topic: None and drops ai_generated. Harmless, but the AI tag is lost on reviewed AI questions.",
+    "get_progress runs 2 count queries per category (14 categories, about 28 queries per request). Acceptable now; consider a single aggregation.",
+    "content.py is 1596 lines, over the 700-line guideline. Consider splitting it into modules (laws.py, questions.py, topics.py).",
+    "laws.tsx search now also filters by categoria slug. The iteration-3 suggestion is implemented."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py (category count updated from 12 to 14; TestIteration4 added)"],
+  "success_rate": {"backend": "100% (51/51)", "frontend": "~85% (all flows work; unstyled review-mistakes CTA and empty Library/Flashcard screens for the new categories)"},
+  "seed_data_creation": "Test-only mistakes/attempts for device_ids prefixed TEST_it4-* and random browser device ids.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "No auth; device_id is created client-side in localStorage, so each Playwright run starts with a fresh device. The mistakes quiz route is /quiz/errori. Law chip testIDs are related-law-<numero> (e.g. 'related-law-L. 1150/1942'), law cards are law-<lid>, and the quiz next button is quiz-next. Expo restarted during testing and briefly returned a 502 on full page reloads; retrying worked. Once the answer-shuffle fix lands, tests that answer with option index 0 as 'correct' must read the correct index from the /api/quiz/submit response instead."
+}

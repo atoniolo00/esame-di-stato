@@ -8,7 +8,7 @@ Nota: sintesi di studio. Verifica sempre la normativa vigente sulle fonti uffici
 
 import seed_data
 
-CONTENT_VERSION = 4
+CONTENT_VERSION = 7
 
 CATEGORIES = seed_data.CATEGORIES
 
@@ -1370,3 +1370,227 @@ LAWS = [
 ALL_QUESTIONS = ALL_QUESTIONS + EXTRA_QUESTIONS2
 DESIGN_QUESTIONS = DESIGN_QUESTIONS + EXTRA_DESIGN
 TRACCE = TRACCE + EXTRA_TRACCE
+
+
+# =============================================================================
+# AMPLIAMENTO v5 — normativa per argomento + dettagli, quiz normativa/attualità,
+# domande da prove meno recenti, norme collegate agli argomenti
+# =============================================================================
+EXTRA_CATEGORIES = [
+    {"slug": "normativa", "name": "Normativa", "icon": "book", "blurb": "Quiz sulle principali leggi: numeri, date e contenuti."},
+    {"slug": "attualita", "name": "Attualità e temi", "icon": "globe", "blurb": "Sostenibilità, rigenerazione, PNRR e Olimpiadi 2026."},
+]
+
+# --- Dettaglio esteso per ogni norma (mostrato nella scheda Normativa) ---
+LAW_DETTAGLI = {
+    "L. 2359/1865": "Nata per le grandi opere dell'Italia post-unitaria, disciplina l'esproprio per pubblica utilità e i primi piani regolatori e di ampliamento delle città. Pone le basi del rapporto tra interesse pubblico e proprietà privata.",
+    "L. 1150/1942": "Struttura la pianificazione su più livelli (piani territoriali, PRG comunale, piani particolareggiati) e introduce la licenza edilizia. È il telaio del diritto urbanistico italiano, ancora oggi il riferimento di base.",
+    "L. 167/1962": "Consente ai Comuni di acquisire aree (anche tramite esproprio) per realizzare quartieri di edilizia economica e popolare, calmierando il mercato e dando alloggi alle fasce deboli.",
+    "L. 765/1967": "Reazione all'abusivismo del dopoguerra: rende il PRG obbligatorio per tutti i Comuni, introduce la licenza edilizia generalizzata e prepara l'emanazione degli standard (DM 1444/68).",
+    "DM 1444/1968": "Fissa regole quantitative uniformi: zone omogenee A–F, dotazioni minime di spazi pubblici (18 mq/ab per la residenza) e limiti inderogabili di densità, altezza e distanza (10 m tra pareti finestrate).",
+    "L. 865/1971": "La 'legge sulla casa' riforma gli espropri per l'edilizia pubblica e introduce i Piani per gli Insediamenti Produttivi (PIP) per dotare il territorio di aree artigianali e industriali attrezzate.",
+    "L. 10/1977 (Bucalossi)": "Afferma che il diritto di edificare è connesso a un contributo verso la collettività: introduce oneri di urbanizzazione e costo di costruzione. Separa concettualmente lo ius aedificandi dalla proprietà del suolo.",
+    "L. 457/1978": "Definisce le categorie di intervento (manutenzione, restauro, ristrutturazione) e introduce i piani di recupero, spostando l'attenzione dalla sola espansione al riuso del patrimonio esistente.",
+    "L. 47/1985": "Primo grande condono edilizio: disciplina in modo organico sanzioni, sanatorie e procedure per gli abusi, tuttora base del sistema sanzionatorio insieme al DPR 380/2001.",
+    "L. 431/1985 (Galasso)": "Introduce vincoli paesaggistici 'per legge' su vaste categorie di territorio (coste, fiumi, laghi, montagne, boschi), anticipando la tutela poi confluita nel Codice del paesaggio.",
+    "L. 13/1989": "Rende obbligatorie negli edifici privati le misure per il superamento delle barriere architettoniche e prevede contributi economici; impone l'accessibilità già in fase di progetto.",
+    "DM 236/1989": "È il regolamento tecnico dell'accessibilità: definisce accessibilità, visitabilità e adattabilità e fissa parametri dimensionali (rampe max 8%, rotazione Ø 150 cm, porte ≥ 80 cm).",
+    "L. 122/1989 (Tognoli)": "Per contrastare la carenza di sosta, impone 1 mq di parcheggio ogni 10 mc di costruzione e facilita la realizzazione di parcheggi pertinenziali anche nel sottosuolo e in deroga ai piani.",
+    "L. 109/1994 (Merloni)": "Prima legge quadro organica sui lavori pubblici dopo Tangentopoli: punta su trasparenza, centralità del progetto e riduzione della discrezionalità. Superata dai Codici del 2006, 2016 e 2023.",
+    "L. 447/1995": "Legge quadro sull'inquinamento acustico: fissa competenze, valori limite e impone ai Comuni la classificazione acustica del territorio in sei classi.",
+    "DPR 503/1996": "Estende i principi di accessibilità del DM 236/89 a edifici, spazi e servizi pubblici, garantendo la fruibilità della città e delle strutture collettive.",
+    "DPCM 5/12/1997": "Stabilisce i requisiti acustici passivi degli edifici (isolamento di facciata e tra ambienti, rumore da calpestio e degli impianti) differenziati per destinazione d'uso.",
+    "DPR 380/2001": "Testo Unico dell'Edilizia: riordina categorie di intervento e titoli abilitativi (permesso di costruire, SCIA, CILA, edilizia libera), agibilità e disciplina sanzionatoria degli abusi.",
+    "DPR 327/2001": "Testo Unico sull'espropriazione: regola in modo unitario vincolo preordinato, dichiarazione di pubblica utilità, indennità (serio ristoro) e decreto di esproprio.",
+    "L. cost. 3/2001": "Riforma il Titolo V della Costituzione: l'urbanistica diventa 'governo del territorio', materia concorrente in cui lo Stato detta i principi e le Regioni legiferano nel dettaglio.",
+    "OPCM 3274/2003": "Dopo il terremoto di San Giuliano, riclassifica l'intero territorio nazionale in 4 zone sismiche e avvia l'aggiornamento delle norme tecniche antisismiche.",
+    "D.Lgs. 42/2004 (Urbani)": "Codice dei beni culturali e del paesaggio: disciplina tutela e valorizzazione dei beni e introduce l'autorizzazione paesaggistica per gli interventi in area vincolata.",
+    "D.Lgs. 192/2005": "Recepisce la direttiva europea EPBD: introduce la certificazione energetica (APE), i requisiti minimi dell'involucro e degli impianti e il percorso verso gli edifici NZEB.",
+    "D.Lgs. 81/2008": "Testo Unico su salute e sicurezza sul lavoro; il Titolo IV regola i cantieri con coordinatori (CSP/CSE), PSC, POS, PiMUS e fascicolo dell'opera.",
+    "NTC 2008 → 2018": "Introducono in Italia il metodo semiprobabilistico agli stati limite in sostituzione delle tensioni ammissibili; la versione vigente è il DM 17/1/2018.",
+    "DL 1/2012 e L. 27/2012": "Nel quadro delle liberalizzazioni abrogano le tariffe professionali minime obbligatorie e impongono la trasparenza del preventivo al cliente.",
+    "DM 3/8/2015": "Codice di Prevenzione Incendi: passa da regole prescrittive a un approccio prestazionale, con misure antincendio (S.1–S.10) e la classificazione REI degli elementi.",
+    "DM 26/6/2015": "I 'requisiti minimi' definiscono come calcolare la prestazione energetica e fissano lo standard dell'edificio a energia quasi zero (NZEB) per i nuovi edifici.",
+    "DM 17/1/2018": "NTC 2018: norme tecniche vigenti per le costruzioni; definiscono azioni, combinazioni, vita nominale, classi d'uso e criteri antisismici (con Circolare 7/2019).",
+    "DL 76/2020 (Semplificazioni)": "Modifica il DPR 380/2001: introduce lo 'stato legittimo' dell'immobile, le tolleranze costruttive e amplia la ristrutturazione con demolizione e ricostruzione.",
+    "D.Lgs. 199/2021": "Recepisce la direttiva RED II: impone quote minime di energia da fonti rinnovabili nei nuovi edifici e nelle ristrutturazioni rilevanti.",
+    "D.Lgs. 36/2023": "Nuovo Codice dei contratti pubblici: principi di risultato, fiducia e accesso al mercato; riduce i livelli di progetto a PFTE ed esecutivo e digitalizza le procedure.",
+}
+
+for _law in LAWS:
+    _law["dettaglio"] = LAW_DETTAGLI.get(_law["numero"], "")
+
+# --- Norme collegate per argomento (numeri che corrispondono a LAWS) ---
+RELATED_LAWS = {
+    "urbanistica-fondamenti": ["L. 2359/1865", "L. 1150/1942", "L. 765/1967", "L. cost. 3/2001"],
+    "zone-omogenee-standard": ["DM 1444/1968", "L. 765/1967"],
+    "piani-attuativi": ["L. 1150/1942", "L. 167/1962", "L. 865/1971", "L. 457/1978"],
+    "opere-urbanizzazione-oneri": ["L. 10/1977 (Bucalossi)", "L. 122/1989 (Tognoli)"],
+    "perequazione-compensazione": ["L. cost. 3/2001"],
+    "vincoli-esproprio": ["DPR 327/2001", "L. 431/1985 (Galasso)"],
+    "rigenerazione-consumo-suolo": ["DL 76/2020 (Semplificazioni)", "D.Lgs. 199/2021"],
+    "parametri-edilizi-urbanistici": ["DM 1444/1968"],
+    "titoli-abilitativi": ["DPR 380/2001", "L. 457/1978", "L. 47/1985", "DL 76/2020 (Semplificazioni)"],
+    "ntc-2018-stati-limite": ["DM 17/1/2018", "NTC 2008 → 2018"],
+    "materiali-predimensionamento": ["DM 17/1/2018"],
+    "criteri-antisismici": ["OPCM 3274/2003", "DM 17/1/2018"],
+    "prevenzione-incendi": ["DM 3/8/2015"],
+    "efficienza-energetica-ape": ["D.Lgs. 192/2005", "DM 26/6/2015", "D.Lgs. 199/2021"],
+    "acustica-edilizia": ["L. 447/1995", "DPCM 5/12/1997"],
+    "barriere-architettoniche": ["DM 236/1989", "DPR 503/1996", "L. 13/1989"],
+    "codice-appalti": ["D.Lgs. 36/2023", "L. 109/1994 (Merloni)"],
+    "catasto-estimo": ["D.Lgs. 42/2004 (Urbani)"],
+    "professione-deontologia": ["DL 1/2012 e L. 27/2012"],
+    "sicurezza-cantieri": ["D.Lgs. 81/2008"],
+    "elementi-costruttivi": [],
+}
+
+for _t in TOPICS:
+    _t["related_laws"] = RELATED_LAWS.get(_t["slug"], [])
+
+# --- QUIZ sulla NORMATIVA ("indovina la norma") ---
+NORMATIVA_QUESTIONS = [
+    {"category": "normativa", "topic": None, "question": "Quale norma fissa le zone omogenee e gli standard urbanistici?",
+     "options": ["DM 1444/1968", "L. 1150/1942", "DPR 380/2001", "L. 10/1977"], "correct": 0,
+     "explanation": "Il DM 1444/1968 definisce zone A–F, standard (18 mq/ab) e limiti inderogabili di densità, altezza e distanze."},
+    {"category": "normativa", "topic": None, "question": "Il Testo Unico dell'Edilizia è contenuto in:",
+     "options": ["DPR 380/2001", "DPR 327/2001", "D.Lgs. 42/2004", "DM 236/1989"], "correct": 0,
+     "explanation": "Il DPR 380/2001 raccoglie categorie d'intervento e titoli abilitativi; il DPR 327/2001 è il T.U. espropri."},
+    {"category": "normativa", "topic": None, "question": "Quale legge ha reso onerosa l'edificazione (contributo di costruzione)?",
+     "options": ["L. 10/1977 (Bucalossi)", "L. 1150/1942", "L. 765/1967", "L. 47/1985"], "correct": 0,
+     "explanation": "La legge Bucalossi (10/1977) introduce oneri di urbanizzazione e costo di costruzione."},
+    {"category": "normativa", "topic": None, "question": "La legge quadro sull'inquinamento acustico è la:",
+     "options": ["L. 447/1995", "DPCM 5/12/1997", "L. 13/1989", "L. 431/1985"], "correct": 0,
+     "explanation": "La L. 447/1995 è la legge quadro; il DPCM 5/12/1997 fissa i requisiti acustici passivi degli edifici."},
+    {"category": "normativa", "topic": None, "question": "I requisiti acustici passivi degli edifici sono fissati dal:",
+     "options": ["DPCM 5/12/1997", "L. 447/1995", "DM 1444/1968", "DPR 503/1996"], "correct": 0,
+     "explanation": "Il DPCM 5/12/1997 definisce R'w, D2m,nT,w, L'n,w e i limiti per gli impianti."},
+    {"category": "normativa", "topic": None, "question": "Il Codice dei beni culturali e del paesaggio è il:",
+     "options": ["D.Lgs. 42/2004", "D.Lgs. 36/2023", "DPR 380/2001", "L. 431/1985"], "correct": 0,
+     "explanation": "Il D.Lgs. 42/2004 (Urbani) disciplina tutela e valorizzazione dei beni culturali e del paesaggio."},
+    {"category": "normativa", "topic": None, "question": "La classificazione sismica del territorio in 4 zone deriva da:",
+     "options": ["OPCM 3274/2003", "DM 17/1/2018", "NTC 2008", "L. 1150/1942"], "correct": 0,
+     "explanation": "L'OPCM 3274/2003 ha riclassificato l'intero territorio in 4 zone sismiche."},
+    {"category": "normativa", "topic": None, "question": "Il Codice di Prevenzione Incendi (approccio prestazionale) è il:",
+     "options": ["DM 3/8/2015", "DPR 151/2011", "D.Lgs. 81/2008", "DM 236/1989"], "correct": 0,
+     "explanation": "Il DM 3/8/2015 introduce l'approccio prestazionale e le misure antincendio; il DPR 151/2011 elenca le attività soggette."},
+    {"category": "normativa", "topic": None, "question": "Il Testo Unico sulla sicurezza sul lavoro è il:",
+     "options": ["D.Lgs. 81/2008", "D.Lgs. 36/2023", "DPR 380/2001", "L. 109/1994"], "correct": 0,
+     "explanation": "Il D.Lgs. 81/2008 (Titolo IV per i cantieri) disciplina coordinatori, PSC, POS e PiMUS."},
+    {"category": "normativa", "topic": None, "question": "Il nuovo Codice dei contratti pubblici (2023) è il:",
+     "options": ["D.Lgs. 36/2023", "D.Lgs. 50/2016", "L. 109/1994", "D.Lgs. 163/2006"], "correct": 0,
+     "explanation": "Il D.Lgs. 36/2023 ha sostituito il D.Lgs. 50/2016, con i principi di risultato, fiducia e accesso."},
+    {"category": "normativa", "topic": None, "question": "Il Testo Unico sull'espropriazione per pubblica utilità è il:",
+     "options": ["DPR 327/2001", "DPR 380/2001", "L. 2359/1865", "L. 865/1971"], "correct": 0,
+     "explanation": "Il DPR 327/2001 disciplina vincolo, pubblica utilità, indennità e decreto di esproprio."},
+    {"category": "normativa", "topic": None, "question": "Il DM 236/1989 riguarda:",
+     "options": ["L'accessibilità e il superamento delle barriere", "Gli standard urbanistici", "La prevenzione incendi", "Il catasto"], "correct": 0,
+     "explanation": "Il DM 236/1989 definisce accessibilità, visitabilità e adattabilità e i relativi parametri dimensionali."},
+    {"category": "normativa", "topic": None, "question": "La Legge Tognoli (122/1989) riguarda:",
+     "options": ["I parcheggi pertinenziali", "Il condono edilizio", "L'efficienza energetica", "Le barriere architettoniche"], "correct": 0,
+     "explanation": "Impone 1 mq di parcheggio ogni 10 mc, anche nel sottosuolo e in deroga agli strumenti urbanistici."},
+    {"category": "normativa", "topic": None, "question": "La Legge Galasso (431/1985) ha introdotto:",
+     "options": ["Vincoli paesaggistici per legge su ampie categorie di territorio", "Gli standard urbanistici", "Il permesso di costruire", "Il collaudo statico"], "correct": 0,
+     "explanation": "Ha esteso la tutela paesaggistica per legge a coste, fiumi, laghi, montagne e boschi."},
+    {"category": "normativa", "topic": None, "question": "La riforma del Titolo V (L. cost. 3/2001) ha introdotto la nozione di:",
+     "options": ["Governo del territorio (competenza concorrente)", "Urbanistica statale esclusiva", "Piano casa", "Condono"], "correct": 0,
+     "explanation": "Ha sostituito 'urbanistica' con 'governo del territorio', materia concorrente Stato–Regioni."},
+    {"category": "normativa", "topic": None, "question": "Le NTC vigenti corrispondono al decreto:",
+     "options": ["DM 17/1/2018", "DM 14/1/2008", "DM 1444/1968", "DM 3/8/2015"], "correct": 0,
+     "explanation": "Le NTC 2018 (DM 17/1/2018), con Circolare 7/2019, sono le norme tecniche vigenti."},
+    {"category": "normativa", "topic": None, "question": "Il D.Lgs. 192/2005 riguarda:",
+     "options": ["Il rendimento energetico degli edifici (APE)", "Gli appalti pubblici", "La sicurezza nei cantieri", "L'esproprio"], "correct": 0,
+     "explanation": "Recepisce la EPBD: certificazione energetica, requisiti minimi e percorso verso gli NZEB."},
+    {"category": "normativa", "topic": None, "question": "La 'legge ponte' del 1967 ha reso obbligatorio:",
+     "options": ["Il Piano Regolatore Generale", "L'APE", "Il collaudo", "Il condono"], "correct": 0,
+     "explanation": "La L. 765/1967 rese obbligatorio il PRG e introdusse la licenza edilizia generalizzata."},
+]
+
+# --- QUIZ di ATTUALITÀ e temi (sostenibilità, PNRR, Olimpiadi 2026) ---
+ATTUALITA_QUESTIONS = [
+    {"category": "attualita", "topic": None, "question": "Le Olimpiadi invernali del 2026 si svolgono principalmente in quali località italiane?",
+     "options": ["Milano e Cortina d'Ampezzo", "Torino e Sestriere", "Roma e L'Aquila", "Venezia e Belluno"], "correct": 0,
+     "explanation": "I Giochi 'Milano Cortina 2026' sono diffusi su più sedi del Nord Italia con poli principali a Milano e Cortina d'Ampezzo."},
+    {"category": "attualita", "topic": None, "question": "Il Villaggio Olimpico di Milano 2026 nasce dalla rigenerazione di quale area?",
+     "options": ["Un ex scalo ferroviario (Scalo di Porta Romana)", "Un aeroporto dismesso", "Un'area agricola vergine", "Un centro commerciale"], "correct": 0,
+     "explanation": "È realizzato nell'ex Scalo di Porta Romana e sarà riconvertito a studentato: esempio di rigenerazione urbana e riuso dopo l'evento."},
+    {"category": "attualita", "topic": None, "question": "Un principio chiave per gli impianti olimpici 2026 è:",
+     "options": ["Riuso di impianti esistenti e strutture temporanee", "Costruire sempre nuovi grandi stadi", "Impermeabilizzare nuove aree", "Evitare il trasporto pubblico"], "correct": 0,
+     "explanation": "La sostenibilità punta su riuso, impianti temporanei e legacy, evitando 'cattedrali nel deserto' inutilizzate dopo i Giochi."},
+    {"category": "attualita", "topic": None, "question": "In urbanistica, l'eredità ('legacy') di un grande evento riguarda:",
+     "options": ["Il riutilizzo duraturo delle opere dopo l'evento", "La demolizione totale a fine evento", "L'aumento del consumo di suolo", "La sola immagine mediatica"], "correct": 0,
+     "explanation": "La legacy valuta i benefici di lungo periodo (infrastrutture, alloggi, spazi pubblici) che restano alla città."},
+    {"category": "attualita", "topic": None, "question": "L'obiettivo europeo sul consumo di suolo è:",
+     "options": ["Consumo netto pari a zero (tendenzialmente al 2050)", "Raddoppio delle aree edificate", "Nessun limite", "Solo per le coste"], "correct": 0,
+     "explanation": "L'UE punta al consumo di suolo netto zero, privilegiando riuso e rigenerazione dell'esistente."},
+    {"category": "attualita", "topic": None, "question": "La direttiva europea 'case green' (EPBD) spinge soprattutto verso:",
+     "options": ["La riqualificazione energetica del patrimonio esistente", "La demolizione dei centri storici", "L'aumento dei consumi", "L'abolizione dell'APE"], "correct": 0,
+     "explanation": "La EPBD aggiornata fissa obiettivi di riduzione dei consumi e riqualificazione progressiva degli edifici verso emissioni zero."},
+    {"category": "attualita", "topic": None, "question": "Il PNRR, per l'ambiente costruito, finanzia prioritariamente:",
+     "options": ["Efficientamento, rigenerazione urbana e messa in sicurezza", "Solo nuove autostrade", "L'espansione illimitata delle periferie", "La riduzione del verde"], "correct": 0,
+     "explanation": "Il Piano Nazionale di Ripresa e Resilienza destina risorse a transizione ecologica, rigenerazione urbana e sicurezza del territorio."},
+    {"category": "attualita", "topic": None, "question": "I CAM (Criteri Ambientali Minimi) negli appalti pubblici servono a:",
+     "options": ["Garantire requisiti di sostenibilità in lavori e forniture", "Ridurre la concorrenza", "Abolire il collaudo", "Aumentare i ribassi"], "correct": 0,
+     "explanation": "I CAM impongono criteri ecologici (materiali, energia, rifiuti) obbligatori negli acquisti e nei lavori pubblici."},
+    {"category": "attualita", "topic": None, "question": "L'invarianza idraulica nella progettazione urbana richiede di:",
+     "options": ["Non aumentare il deflusso delle acque rispetto allo stato naturale", "Impermeabilizzare tutto il lotto", "Eliminare le fognature", "Ridurre le aree verdi"], "correct": 0,
+     "explanation": "Impone di gestire in loco le acque meteoriche (vasche, suoli permeabili) per non aggravare il rischio idraulico a valle."},
+    {"category": "attualita", "topic": None, "question": "Le 'isole di calore urbane' si contrastano soprattutto con:",
+     "options": ["Verde urbano, superfici chiare e permeabili", "Più asfalto scuro", "Meno alberi", "Coperture metalliche non isolate"], "correct": 0,
+     "explanation": "Vegetazione, materiali riflettenti e suoli permeabili riducono le temperature superficiali e migliorano il microclima."},
+    {"category": "attualita", "topic": None, "question": "L'edificio NZEB, oggi standard per i nuovi edifici, è:",
+     "options": ["A energia quasi zero", "A consumo libero", "Privo di impianti", "Solo in legno"], "correct": 0,
+     "explanation": "Nearly Zero Energy Building: fabbisogno molto basso coperto in larga parte da fonti rinnovabili."},
+    {"category": "attualita", "topic": None, "question": "I bonus edilizi (es. ecobonus/Superbonus) incentivano principalmente:",
+     "options": ["Efficientamento energetico e sicurezza sismica", "L'aumento di cubatura illegale", "La riduzione dell'isolamento", "La demolizione dei vincoli"], "correct": 0,
+     "explanation": "Sono detrazioni fiscali per migliorare prestazione energetica e sicurezza (sismabonus) del patrimonio esistente."},
+    {"category": "attualita", "topic": None, "question": "L'equo compenso (L. 49/2023) tutela:",
+     "options": ["L'adeguatezza del compenso del professionista", "Le tariffe minime obbligatorie reintrodotte", "Il solo committente pubblico", "La gratuità delle prestazioni"], "correct": 0,
+     "explanation": "Garantisce un compenso proporzionato all'opera nei rapporti con committenti 'forti', senza reintrodurre tariffe minime generalizzate."},
+    {"category": "attualita", "topic": None, "question": "La 'città dei 15 minuti' è un modello urbano che promuove:",
+     "options": ["Servizi essenziali raggiungibili a piedi/bici in pochi minuti", "La dipendenza dall'auto", "La monofunzionalità delle zone", "L'espansione a bassa densità"], "correct": 0,
+     "explanation": "Prossimità e mixité funzionale: abitare, lavorare e servizi vicini, per ridurre spostamenti ed emissioni."},
+]
+
+# --- Domande ispirate a prove meno recenti (integrazione trasversale) ---
+EXTRA_QUESTIONS3 = [
+    {"category": "costruttivi", "topic": "elementi-costruttivi", "question": "In un solaio latero-cementizio la soletta collaborante in c.a. serve a:",
+     "options": ["Ripartire i carichi e collaborare a flessione/taglio", "Isolare acusticamente soltanto", "Sostituire i travetti", "Impermeabilizzare"], "correct": 0,
+     "explanation": "La soletta superiore collega i travetti, ripartisce i carichi e collabora strutturalmente (effetto piastra)."},
+    {"category": "costruttivi", "topic": "elementi-costruttivi", "question": "Il giunto di dilatazione in un edificio serve a:",
+     "options": ["Assorbire le variazioni termiche e i movimenti differenziali", "Aumentare il peso", "Ridurre l'isolamento", "Sostenere la copertura"], "correct": 0,
+     "explanation": "Il giunto separa parti della costruzione per assorbire dilatazioni termiche, ritiro e cedimenti differenziali."},
+    {"category": "strutture", "topic": "materiali-predimensionamento", "question": "In una mensola in c.a. l'armatura principale tesa si dispone:",
+     "options": ["In alto (lembo superiore)", "In basso", "Solo al centro", "In diagonale"], "correct": 0,
+     "explanation": "Nella mensola il momento tende le fibre superiori: l'armatura principale va in alto, verso l'incastro."},
+    {"category": "strutture", "topic": "ntc-2018-stati-limite", "question": "Il controllo delle frecce (deformazioni) di una trave è una verifica di:",
+     "options": ["Stato limite di esercizio (SLE)", "Stato limite ultimo (SLU)", "Reazione al fuoco", "Collaudo statico"], "correct": 0,
+     "explanation": "Le frecce e le deformazioni riguardano la funzionalità in esercizio: verifica SLE."},
+    {"category": "edilizia", "topic": "titoli-abilitativi", "question": "Il mutamento di destinazione d'uso urbanisticamente rilevante, di norma:",
+     "options": ["Incide sul carico urbanistico e richiede titolo idoneo", "È sempre edilizia libera", "Non è mai consentito", "Richiede solo una e-mail"], "correct": 0,
+     "explanation": "Il cambio d'uso tra categorie funzionali diverse modifica il carico urbanistico e richiede il titolo abilitativo adeguato."},
+    {"category": "urbanistica", "topic": "parametri-edilizi-urbanistici", "question": "La distanza minima dei fabbricati dalle strade è disciplinata anche da:",
+     "options": ["Codice della strada e fasce di rispetto", "Solo dall'APE", "Solo dal catasto", "Dal DPCM acustica"], "correct": 0,
+     "explanation": "Oltre al piano, le distanze dalle strade seguono il Codice della strada e le relative fasce di rispetto."},
+    {"category": "urbanistica", "topic": "zone-omogenee-standard", "question": "Negli insediamenti industriali (zona D) lo standard a spazi pubblici è di norma almeno:",
+     "options": ["10% della superficie", "18 mq/abitante", "80 mq ogni 100 mq", "Nessuno"], "correct": 0,
+     "explanation": "Per la zona D il DM 1444/68 richiede almeno il 10% della superficie destinato a spazi pubblici."},
+    {"category": "professione", "topic": "professione-deontologia", "question": "Il collaudo statico di un'opera in c.a. deve essere eseguito da un tecnico:",
+     "options": ["Abilitato e diverso dal progettista/direttore lavori", "Qualsiasi, anche non abilitato", "Solo dall'impresa", "Dal committente"], "correct": 0,
+     "explanation": "Il collaudatore statico è un tecnico abilitato e indipendente, non coinvolto nella progettazione o direzione dei lavori."},
+    {"category": "incendi", "topic": "prevenzione-incendi", "question": "La larghezza delle vie di esodo si dimensiona in funzione:",
+     "options": ["Dell'affollamento previsto", "Del colore delle pareti", "Del numero di finestre", "Della classe catastale"], "correct": 0,
+     "explanation": "Le uscite e i percorsi d'esodo si dimensionano sull'affollamento (moduli di uscita) per garantire l'evacuazione sicura."},
+    {"category": "barriere", "topic": "barriere-architettoniche", "question": "In un bagno accessibile lo spazio di accostamento al WC deve essere:",
+     "options": ["Laterale, per il trasferimento dalla sedia a ruote", "Assente", "Solo frontale e stretto", "Indifferente"], "correct": 0,
+     "explanation": "Serve uno spazio laterale (≥100 cm) per il trasferimento dalla carrozzina, con maniglioni di sostegno."},
+    {"category": "energetico", "topic": "efficienza-energetica-ape", "question": "Il 'cappotto' termico esterno è efficace soprattutto perché:",
+     "options": ["Riduce i ponti termici con isolamento continuo", "Aumenta la massa interna", "Elimina la barriera al vapore", "Riduce la superficie utile"], "correct": 0,
+     "explanation": "Isolando con continuità l'involucro, il cappotto limita i ponti termici e migliora il comfort e i consumi."},
+    {"category": "catasto", "topic": "catasto-estimo", "question": "Il metodo sintetico-comparativo stima il valore di un fabbricato civile:",
+     "options": ["Per confronto con beni simili (€/mq)", "Capitalizzando solo i costi", "Con il valore di surrogazione", "Con la sola rendita catastale"], "correct": 0,
+     "explanation": "Confronta il bene con immobili analoghi recentemente compravenduti, corretti da coefficienti di merito (€/mq)."},
+]
+
+CATEGORIES = CATEGORIES + EXTRA_CATEGORIES
+ALL_QUESTIONS = ALL_QUESTIONS + NORMATIVA_QUESTIONS + ATTUALITA_QUESTIONS + EXTRA_QUESTIONS3

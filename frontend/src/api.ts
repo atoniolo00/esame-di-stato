@@ -8,17 +8,20 @@ const BASE = `${process.env.EXPO_PUBLIC_BACKEND_URL}/api`;
 const DEVICE_KEY = "arch_device_id";
 let cachedId: string | null = null;
 
-export async function ensureDeviceId(): Promise<string> {
-  if (cachedId) return cachedId;
-  const existing = await storage.getItem<string>(DEVICE_KEY, "");
-  if (existing) {
-    cachedId = existing;
-    return existing;
-  }
-  const id = `dev_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-  await storage.setItem(DEVICE_KEY, id);
-  cachedId = id;
-  return id;
+let pendingId: Promise<string> | null = null;
+
+export function ensureDeviceId(): Promise<string> {
+  if (cachedId) return Promise.resolve(cachedId);
+  pendingId ||= (async () => {
+    let id = await storage.getItem<string>(DEVICE_KEY, "");
+    if (!id) {
+      id = `dev_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      await storage.setItem(DEVICE_KEY, id);
+    }
+    cachedId = id;
+    return id;
+  })();
+  return pendingId;
 }
 
 // ---------------------------------------------------------------------------
@@ -43,7 +46,7 @@ export type TopicMeta = {
   key_points: string[];
 };
 
-export type Topic = TopicMeta & { content: string };
+export type Topic = TopicMeta & { content: string; related_laws?: string[] };
 
 export type Question = {
   qid: string;
@@ -129,8 +132,13 @@ export type DesignQuestion = { did: string; category: string; titolo: string; pr
 export const getDesignQuestions = (category?: string) =>
   api<DesignQuestion[]>(`/design-questions${category ? `?category=${category}` : ""}`);
 
-export type Law = { lid: string; anno: number; numero: string; titolo: string; categoria: string; apporto: string };
+export type Law = { lid: string; anno: number; numero: string; titolo: string; categoria: string; apporto: string; dettaglio?: string };
 export const getLaws = () => api<Law[]>("/laws");
+
+export async function getMistakesQuiz() {
+  const device_id = await ensureDeviceId();
+  return api<Question[]>(`/quiz/mistakes?device_id=${device_id}`);
+}
 
 export async function submitAnswer(questionId: string, selectedIndex: number) {
   const device_id = await ensureDeviceId();

@@ -21,10 +21,12 @@ export default function LibraryScreen() {
   const progressQ = useQuery({ queryKey: ["progress"], queryFn: getProgress });
 
   const [selected, setSelected] = useState<string | undefined>(undefined);
+  const cats = (catsQ.data ?? []).filter((c) => c.topic_count > 0);
 
   useEffect(() => {
     if (params.category) setSelected(params.category);
-    else if (!selected && catsQ.data?.length) setSelected(catsQ.data[0].slug);
+    else if (!selected && cats.length) setSelected(cats[0].slug);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.category, catsQ.data]);
 
   const topicsQ = useQuery({
@@ -75,7 +77,7 @@ export default function LibraryScreen() {
           contentContainerStyle={styles.chipRow}
           style={styles.chipScroller}
         >
-          {(catsQ.data ?? []).map((c) => {
+          {cats.map((c) => {
             const active = c.slug === selected;
             return (
               <Pressable

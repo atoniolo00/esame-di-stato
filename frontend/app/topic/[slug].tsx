@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,6 +16,7 @@ export default function TopicScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
+  const router = useRouter();
   const { slug } = useLocalSearchParams<{ slug: string }>();
 
   const topicQ = useQuery({ queryKey: ["topic", slug], queryFn: () => getTopic(slug!), enabled: !!slug });
@@ -88,6 +89,25 @@ export default function TopicScreen() {
         </View>
 
         <Markdown style={mdStyles(colors)}>{t.content}</Markdown>
+
+        {t.related_laws && t.related_laws.length > 0 ? (
+          <View style={styles.lawsBox}>
+            <Text style={styles.lawsTitle}>NORME COLLEGATE</Text>
+            <View style={styles.lawsChips}>
+              {t.related_laws.map((numero) => (
+                <Pressable
+                  key={numero}
+                  testID={`related-law-${numero}`}
+                  style={styles.lawChip}
+                  onPress={() => router.push(`/laws?focus=${encodeURIComponent(numero)}` as any)}
+                >
+                  <Icon name="book" size={13} color={colors.brandPrimary} />
+                  <Text style={styles.lawChipText}>{numero}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        ) : null}
       </ScrollView>
 
       <View style={[styles.ctaBar, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
@@ -127,6 +147,27 @@ const useStyles = makeStyles((colors) => ({
   keyTitle: { fontFamily: fonts.medium, fontSize: 11, letterSpacing: 1.2, color: colors.brandPrimary },
   keyRow: { flexDirection: "row", gap: spacing.sm, alignItems: "flex-start" },
   keyText: { flex: 1, fontFamily: fonts.regular, fontSize: 14, color: colors.onSurface, lineHeight: 20 },
+  lawsBox: {
+    marginTop: spacing.xl,
+    paddingTop: spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.divider,
+    gap: spacing.sm,
+  },
+  lawsTitle: { fontFamily: fonts.medium, fontSize: 11, letterSpacing: 1.2, color: colors.brandPrimary },
+  lawsChips: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
+  lawChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: colors.surfaceSecondary,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.md,
+    minHeight: 44,
+  },
+  lawChipText: { fontFamily: fonts.medium, fontSize: 13, color: colors.onSurface },
   ctaBar: {
     position: "absolute",
     left: 0,

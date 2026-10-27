@@ -73,3 +73,11 @@ Teoria basata sul riassunto "ceccarelli" (prontuario tecnico) e sulle tracce est
 ## Prossimi task
 - Arricchire la banca dati dei quiz e flashcard.
 - Aggiungere modalità "simulazione esame" cronometrata.
+
+## Iteration 4 — verified (June 2026)
+- Leggi per tema, quiz Normativa e Attualità/Olimpiadi, norme collegate cliccabili nella teoria, ripasso errori: TESTED OK (iter 4-6).
+- Fix: opzioni quiz mescolate (prima la risposta giusta era quasi sempre A), pulsante "Allenati sui tuoi errori" stilizzato, categorie vuote nascoste, device_id unico al primo avvio, domande AI mescolate.
+- Backlog: etichetta anno/sessione per domande di esami passati; tracce di anni precedenti al 2024.
+
+## Expo SDK 58 upgrade (June 2026)
+- Upgrade interrotto lasciava expo 58 con react-native 0.86 → build prod falliva (react-native/asset-registry). Risolto con `yarn expo install --fix`: expo 58.0.19, RN 0.88.0, React 19.3.0. expo-doctor 20/20, export web/android OK, regressione completa OK (iter 7).

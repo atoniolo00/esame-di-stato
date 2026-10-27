@@ -6,7 +6,7 @@ import uuid
 import pytest
 import requests
 
-BASE_URL = os.environ.get("EXPO_PUBLIC_BACKEND_URL", "https://state-exam-master.preview.emergentagent.com").rstrip("/")
+BASE_URL = os.environ["EXPO_PUBLIC_BACKEND_URL"].rstrip("/")
 API = f"{BASE_URL}/api"
 
 DEVICE_ID = f"test-device-{uuid.uuid4().hex[:8]}"
@@ -31,7 +31,7 @@ class TestContent:
         assert r.status_code == 200
         data = r.json()
         assert isinstance(data, list)
-        assert len(data) == 12, f"Expected 12 categories, got {len(data)}"
+        assert len(data) == 14, f"Expected 14 categories (12 + normativa + attualita), got {len(data)}"
         for c in data:
             assert {"slug", "name", "topic_count", "question_count", "flashcard_count"}.issubset(c.keys())
             assert "_id" not in c
@@ -375,3 +375,201 @@ class TestIteration3:
         for d in dq:
             assert set(["did", "categoria" if "categoria" in d else "category", "titolo", "prompt", "guida"]).intersection(d.keys())
             assert d["titolo"] and d["prompt"] and d["guida"]
+
+
+# ---- Iteration 4: laws by topic, normativa/attualita quiz, mistakes review, related_laws ----
+class TestIteration4:
+    DEV = f"TEST_it4-{uuid.uuid4().hex[:8]}"
+
+    def test_laws_grouped_with_details(self, s):
+        r = s.get(f"{API}/laws")
+        assert r.status_code == 200
+        laws = r.json()
+        assert len(laws) >= 30
+        cats = {l["categoria"] for l in laws}
+        assert len(cats) >= 5, f"laws should span many topics, got {cats}"
+        for l in laws:
+            assert "_id" not in l
+            assert l["dettaglio"] and len(l["dettaglio"]) > 40, f"missing dettaglio for {l['numero']}"
+
+    def test_new_categories_exist(self, s):
+        cats = {c["slug"]: c for c in s.get(f"{API}/categories").json()}
+        assert cats["normativa"]["question_count"] >= 10
+        assert cats["attualita"]["question_count"] >= 10
+
+    def test_quiz_normativa(self, s):
+        qs = s.get(f"{API}/quiz", params={"category": "normativa", "limit": 10}).json()
+        assert len(qs) == 10
+        assert all(q["category"] == "normativa" for q in qs)
+        assert all(0 <= q["correct"] < len(q["options"]) for q in qs)
+
+    def test_quiz_attualita_has_olympics(self, s):
+        qs = s.get(f"{API}/quiz", params={"category": "attualita", "limit": 50}).json()
+        assert len(qs) >= 10
+        assert all(q["category"] == "attualita" for q in qs)
+        text = " ".join(q["question"] + " " + q["explanation"] for q in qs).lower()
+        assert "olimpi" in text or "2026" in text
+
+    def test_related_laws_resolve_to_laws(self, s):
+        numeri = {l["numero"] for l in s.get(f"{API}/laws").json()}
+        topics = s.get(f"{API}/topics").json()
+        with_laws = [t for t in topics if t.get("related_laws")]
+        assert len(with_laws) >= 15
+        for t in with_laws:
+            for n in t["related_laws"]:
+                assert n in numeri, f"{t['slug']} -> {n} not in laws"
+        d = s.get(f"{API}/topics/urbanistica-fondamenti").json()
+        assert "L. 1150/1942" in d["related_laws"]
+
+    def test_mistakes_record_and_clear(self, s):
+        qs = s.get(f"{API}/quiz", params={"category": "normativa", "limit": 2}).json()
+        for q in qs:
+            wrong = (q["correct"] + 1) % len(q["options"])
+            r = s.post(f"{API}/quiz/submit", json={"device_id": self.DEV, "question_id": q["qid"], "selected_index": wrong})
+            assert r.status_code == 200 and r.json()["correct"] is False
+        # duplicate wrong answer must not duplicate the mistake
+        q0 = qs[0]
+        s.post(f"{API}/quiz/submit", json={"device_id": self.DEV, "question_id": q0["qid"], "selected_index": (q0["correct"] + 1) % 4})
+        m = s.get(f"{API}/mistakes", params={"device_id": self.DEV}).json()
+        assert {x["question_id"] for x in m} == {q["qid"] for q in qs}
+        mq = s.get(f"{API}/quiz/mistakes", params={"device_id": self.DEV}).json()
+        assert len(mq) == 2
+        for x in mq:
+            assert {"qid", "question", "options", "correct", "explanation"}.issubset(x.keys())
+            assert "_id" not in x
+        p = s.get(f"{API}/progress", params={"device_id": self.DEV}).json()
+        assert p["open_mistakes"] == 2
+        # answer correctly -> removed
+        r = s.post(f"{API}/quiz/submit", json={"device_id": self.DEV, "question_id": q0["qid"], "selected_index": q0["correct"]})
+        assert r.json()["correct"] is True
+        mq2 = s.get(f"{API}/quiz/mistakes", params={"device_id": self.DEV}).json()
+        assert [x["qid"] for x in mq2] == [qs[1]["qid"]]
+
+    def test_mistakes_requires_device(self, s):
+        assert s.get(f"{API}/quiz/mistakes").status_code == 422
+
+    def test_mistakes_empty_for_new_device(self, s):
+        r = s.get(f"{API}/quiz/mistakes", params={"device_id": f"TEST_empty-{uuid.uuid4().hex[:6]}"})
+        assert r.status_code == 200 and r.json() == []
+
+    def test_simulation_and_search_regression(self, s):
+        sim = s.get(f"{API}/quiz/simulation", params={"count": 40}).json()
+        assert len(sim) == 40 and len({q["qid"] for q in sim}) == 40
+        res = s.get(f"{API}/topics/search", params={"q": "standard"}).json()
+        assert len(res) >= 1 and all("content" not in t for t in res)
+        assert len(s.get(f"{API}/flashcards").json()) >= 40
+        assert len(s.get(f"{API}/tracce").json()) >= 8
+
+
+# ---- Iteration 5: shuffled options, mistakes realignment ------------------
+class TestIteration5:
+    DEV = f"TEST_it5-{uuid.uuid4().hex[:6]}"
+
+    def test_quiz_correct_index_balanced(self, s):
+        qs = s.get(f"{API}/quiz", params={"limit": 200}).json()
+        seed = [q for q in qs if q["qid"].startswith("seed-")]
+        assert len(seed) >= 150
+        dist = [sum(1 for q in seed if q["correct"] == i) for i in range(4)]
+        assert max(dist) / len(seed) < 0.40, dist
+        assert min(dist) / len(seed) > 0.12, dist
+
+    def test_always_a_strategy_fails(self, s):
+        qs = s.get(f"{API}/quiz", params={"limit": 200}).json()
+        hits = sum(1 for q in qs if q["correct"] == 0)
+        assert hits / len(qs) < 0.40
+
+    def test_submit_validates_shuffled_index(self, s):
+        qs = s.get(f"{API}/quiz", params={"category": "urbanistica", "limit": 20}).json()
+        q = next(q for q in qs if q["correct"] != 0)
+        r = s.post(f"{API}/quiz/submit", json={"device_id": self.DEV, "question_id": q["qid"], "selected_index": q["correct"]}).json()
+        assert r["correct"] is True and r["correct_index"] == q["correct"]
+        r0 = s.post(f"{API}/quiz/submit", json={"device_id": self.DEV, "question_id": q["qid"], "selected_index": 0}).json()
+        assert r0["correct"] is False and r0["correct_index"] == q["correct"]
+
+    def test_simulation_balanced_and_consistent(self, s):
+        sims = []
+        for _ in range(3):
+            sims += s.get(f"{API}/quiz/simulation", params={"count": 40}).json()
+        dist = [sum(1 for q in sims if q["correct"] == i) for i in range(4)]
+        assert max(dist) / len(sims) < 0.45, dist
+        q = sims[0]
+        r = s.post(f"{API}/quiz/submit", json={"device_id": self.DEV, "question_id": q["qid"], "selected_index": q["correct"]}).json()
+        assert r["correct"] is True
+
+    def test_mistakes_quiz_matches_live_question_and_clears(self, s):
+        dev = f"TEST_it5m-{uuid.uuid4().hex[:6]}"
+        qs = s.get(f"{API}/quiz", params={"category": "edilizia", "limit": 3}).json()
+        for q in qs:
+            s.post(f"{API}/quiz/submit", json={"device_id": dev, "question_id": q["qid"], "selected_index": (q["correct"] + 1) % 4})
+        mq = s.get(f"{API}/quiz/mistakes", params={"device_id": dev}).json()
+        live = {q["qid"]: q for q in qs}
+        assert len(mq) == 3
+        for m in mq:
+            assert m["options"] == live[m["qid"]]["options"] and m["correct"] == live[m["qid"]]["correct"]
+            r = s.post(f"{API}/quiz/submit", json={"device_id": dev, "question_id": m["qid"], "selected_index": m["correct"]}).json()
+            assert r["correct"] is True
+        assert s.get(f"{API}/quiz/mistakes", params={"device_id": dev}).json() == []
+        assert s.get(f"{API}/progress", params={"device_id": dev}).json()["open_mistakes"] == 0
+
+    def test_existing_mistakes_aligned_with_questions(self):
+        """DB integrity: pre-existing mistakes were realigned to shuffled options on reseed"""
+        from pathlib import Path
+        from pymongo import MongoClient
+        env = dict(l.split("=", 1) for l in Path("/app/backend/.env").read_text().splitlines() if "=" in l)
+        db = MongoClient(env["MONGO_URL"].strip('"'))[env["DB_NAME"].strip('"')]
+        bad = []
+        for m in db.mistakes.find({"question_id": {"$regex": "^seed-"}}):
+            q = db.questions.find_one({"qid": m["question_id"]})
+            if q["options"] != m["options"] or q["correct"] != m["correct"]:
+                bad.append(m["question_id"])
+        assert not bad, f"{len(bad)} misaligned mistakes: {bad[:10]}"
+
+
+# ---- Iteration 6: legacy mistakes realigned, AI shuffle -------------------
+class TestIteration6:
+    LEGACY_DEV = "dev_1793049866387_fkmpywu6"  # pre-v6 browser device with 10 legacy mistakes
+
+    def _live(self, s):
+        qs = s.get(f"{API}/quiz", params={"limit": 500}).json()
+        return {q["qid"]: q for q in qs}
+
+    def test_legacy_mistakes_api_match_live_questions(self, s):
+        live = self._live(s)
+        devs = [self.LEGACY_DEV, "dev_1793050747108_yf98bs7p", "test-device-1dd0c1dc", "test1"]
+        checked = 0
+        for d in devs:
+            for m in s.get(f"{API}/quiz/mistakes", params={"device_id": d}).json():
+                q = live[m["qid"]]
+                assert m["options"] == q["options"], m["qid"]
+                assert m["correct"] == q["correct"], m["qid"]
+                assert m["question"] == q["question"]
+                checked += 1
+        assert checked >= 10
+
+    def test_legacy_mistake_submit_displayed_correct_is_correct(self, s):
+        mq = s.get(f"{API}/quiz/mistakes", params={"device_id": "test-device-1dd0c1dc"}).json()
+        if not mq:
+            pytest.skip("legacy device has no mistakes")
+        m = mq[0]
+        r = s.post(f"{API}/quiz/submit", json={"device_id": "test-device-1dd0c1dc", "question_id": m["qid"], "selected_index": m["correct"]}).json()
+        assert r["correct"] is True and r["correct_index"] == m["correct"]
+        assert all(x["qid"] != m["qid"] for x in s.get(f"{API}/quiz/mistakes", params={"device_id": "test-device-1dd0c1dc"}).json())
+
+    def test_mistakes_list_selected_differs_from_correct(self, s):
+        for m in s.get(f"{API}/mistakes", params={"device_id": self.LEGACY_DEV}).json():
+            assert m["selected_index"] != m["correct"]
+            assert 0 <= m["selected_index"] < len(m["options"])
+
+    def test_ai_generate_shuffled_and_consistent(self, s):
+        r = s.post(f"{API}/quiz/generate", json={"category": "urbanistica", "count": 4}, timeout=120)
+        assert r.status_code == 200, r.text
+        qs = r.json()
+        assert len(qs) >= 2
+        live = self._live(s)
+        for q in qs:
+            assert q["ai_generated"] is True and len(q["options"]) == 4
+            assert 0 <= q["correct"] < 4
+            assert q["qid"] in live and live[q["qid"]]["correct"] == q["correct"] and live[q["qid"]]["options"] == q["options"]
+            sub = s.post(f"{API}/quiz/submit", json={"device_id": "TEST_it6-ai", "question_id": q["qid"], "selected_index": q["correct"]}).json()
+            assert sub["correct"] is True
+        print("AI correct indices:", [q["correct"] for q in qs])

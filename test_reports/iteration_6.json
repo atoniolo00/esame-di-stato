@@ -1,0 +1,32 @@
+{
+  "summary": "Iteration 6 retest of the iteration 5 fixes. All fixes PASS. Backend: full suite 60 passed and 1 skipped. The skip is test_legacy_mistake_submit, which passed on the first run and then consumed the only legacy mistake on test-device-1dd0c1dc. 4 new TestIteration6 tests were added. HIGH, legacy mistakes: meta.version=7, and a DB check shows 47/47 mistakes match db.questions options/correct, with selected_index != correct for all. /api/quiz/mistakes for the legacy devices (dev_..fkmpywu6, dev_..yf98bs7p, test-device-1dd0c1dc, test1) matches /api/quiz exactly. Submitting the displayed correct answer on a legacy mistake returns correct:true and clears it. MEDIUM, device id: a fresh launch with IndexedDB/localStorage cleared directly on /progress fires /progress and /mistakes concurrently, and both use one device_id. The whole session (quiz + review + progress) used a single id. LOW, AI quiz: POST /api/quiz/generate returns shuffled options. The new batch had correct indices [3,2,1,1], the DB doc matches the response, and submitting correct returns true. LOW, laws: shows '1 norma in 1 area' for a single result and '32 norme in 10 aree' by default; ?focus=L. 1150/1942 auto-expands. Regression (390x844): in the edilizia quiz, 9 wrong answers gave 0%. In /quiz/errori, 9/9 mistakes were aligned and 9/9 correct answers gave 100%. The progress screen updates with 18 answered, 50% accuracy and the 'Nessun errore' empty state. Home, practice, library, tutor, simulation, flashcards and practice->quiz navigation all work, with no page errors and no 4xx/5xx API responses. No deprecated Expo packages detected.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/quiz/mistakes", "issue": "Still returns question data copied into the mistakes collection instead of joining live db.questions. Currently aligned thanks to the v7 reseed, but any future content edit without a version bump will desync it again."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "laws", "issues": ["A search with no matches shows only '0 norme in 0 aree' and no empty-state message (e.g. 'Nessuna norma trovata'). Cosmetic."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/iteration_6_results.xml", "/app/test_reports/pytest/iteration_6_full.xml"],
+  "action_items": [
+    "OPTIONAL: Make GET /api/quiz/mistakes join live db.questions by qid so future content edits cannot desync it.",
+    "OPTIONAL: Add an empty-state message on the laws screen when the search returns 0 results."
+  ],
+  "critical_code_review_comments": [
+    "server.py get_mistakes_quiz remains denormalized. This is a fragility risk, not a current bug.",
+    "api.ts ensureDeviceId memoizes the in-flight promise correctly. If storage.getItem rejects, pendingId stays rejected for the session. This is an edge case and low risk."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py (added TestIteration6; removed the hardcoded BASE_URL fallback, so it now requires the EXPO_PUBLIC_BACKEND_URL env var)"],
+  "success_rate": {"backend": "100% (60 passed, 1 skipped after consuming legacy data)", "frontend": "100%"},
+  "seed_data_creation": "TEST_it5-*, TEST_it6-ai devices and 2 dev_* browser devices were created via quiz submits. Generated 4 new AI urbanistica questions. Cleared the legacy mistake on test-device-1dd0c1dc.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Run with EXPO_PUBLIC_BACKEND_URL=https://state-exam-master.preview.emergentagent.com (there is no fallback now). pytest.ini uses xdist (-n). To test the device-id race, clear localStorage and IndexedDB, then reload /progress, which fires /progress and /mistakes concurrently."
+}

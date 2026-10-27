@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { generateQuiz, getQuiz, Question, submitAnswer } from "@/src/api";
-import { ErrorState, Icon, Loading, ScreenHeader } from "@/src/components/ui";
+import { generateQuiz, getMistakesQuiz, getQuiz, Question, submitAnswer } from "@/src/api";
+import { EmptyState, ErrorState, Icon, Loading, ScreenHeader } from "@/src/components/ui";
 import { fonts, makeStyles, radius, spacing, useTheme } from "@/src/theme";
 
 type Result = { correct: boolean; correct_index: number; explanation: string };
@@ -18,10 +18,12 @@ export default function QuizScreen() {
   const router = useRouter();
   const qc = useQueryClient();
   const { category } = useLocalSearchParams<{ category: string }>();
+  const isMistakes = category === "errori";
+  const headerTitle = isMistakes ? "Ripassa errori" : "Quiz";
 
   const quizQ = useQuery({
     queryKey: ["quiz", category],
-    queryFn: () => getQuiz(category!, 10),
+    queryFn: () => (isMistakes ? getMistakesQuiz() : getQuiz(category!, 10)),
     enabled: !!category,
   });
 
@@ -84,7 +86,7 @@ export default function QuizScreen() {
   if (quizQ.isLoading) {
     return (
       <View style={styles.root}>
-        <ScreenHeader title="Quiz" />
+        <ScreenHeader title={headerTitle} />
         <Loading />
       </View>
     );
@@ -92,8 +94,14 @@ export default function QuizScreen() {
   if (quizQ.isError || !questions.length) {
     return (
       <View style={styles.root}>
-        <ScreenHeader title="Quiz" />
-        {aiMut.isPending ? <Loading label="Genero domande con l'AI…" /> : <ErrorState onRetry={() => quizQ.refetch()} />}
+        <ScreenHeader title={headerTitle} />
+        {aiMut.isPending ? (
+          <Loading label="Genero domande con l'AI…" />
+        ) : isMistakes ? (
+          <EmptyState icon="check-circle" title="Nessun errore da ripassare" body="Completa qualche quiz: le domande sbagliate finiranno qui per il ripasso." />
+        ) : (
+          <ErrorState onRetry={() => quizQ.refetch()} />
+        )}
       </View>
     );
   }
@@ -108,25 +116,31 @@ export default function QuizScreen() {
           <Text style={styles.resultLabel}>
             {score} risposte corrette su {questions.length}
           </Text>
-          <Pressable testID="quiz-retry" style={styles.primaryBtn} onPress={() => resetWith(quizQ.data ?? [])}>
+          <Pressable testID="quiz-retry" style={styles.primaryBtn} onPress={() =>
+              isMistakes
+                ? quizQ.refetch().then((r) => resetWith(r.data ?? []))
+                : resetWith(quizQ.data ?? [])
+            }>
             <Icon name="rotate-ccw" size={18} color={colors.onBrandPrimary} />
             <Text style={styles.primaryBtnText}>Rifai il quiz</Text>
           </Pressable>
-          <Pressable
-            testID="quiz-ai-more"
-            style={styles.secondaryBtn}
-            onPress={() => aiMut.mutate()}
-            disabled={aiMut.isPending}
-          >
-            {aiMut.isPending ? (
-              <ActivityIndicator color={colors.brandPrimary} />
-            ) : (
-              <>
-                <Icon name="cpu" size={18} color={colors.onSurface} />
-                <Text style={styles.secondaryBtnText}>{"Genera nuove domande con l'AI"}</Text>
-              </>
-            )}
-          </Pressable>
+          {!isMistakes ? (
+            <Pressable
+              testID="quiz-ai-more"
+              style={styles.secondaryBtn}
+              onPress={() => aiMut.mutate()}
+              disabled={aiMut.isPending}
+            >
+              {aiMut.isPending ? (
+                <ActivityIndicator color={colors.brandPrimary} />
+              ) : (
+                <>
+                  <Icon name="cpu" size={18} color={colors.onSurface} />
+                  <Text style={styles.secondaryBtnText}>{"Genera nuove domande con l'AI"}</Text>
+                </>
+              )}
+            </Pressable>
+          ) : null}
           <Pressable testID="quiz-back" style={styles.textBtn} onPress={() => router.back()}>
             <Text style={styles.textBtnText}>Torna agli esercizi</Text>
           </Pressable>
@@ -140,12 +154,14 @@ export default function QuizScreen() {
   return (
     <View style={styles.root}>
       <ScreenHeader
-        title="Quiz"
+        title={headerTitle}
         subtitle={`Domanda ${index + 1} di ${questions.length}`}
         right={
-          <Pressable testID="quiz-ai-btn" onPress={() => aiMut.mutate()} disabled={aiMut.isPending} hitSlop={10}>
-            <Icon name="cpu" size={20} color={colors.brandPrimary} />
-          </Pressable>
+          !isMistakes ? (
+            <Pressable testID="quiz-ai-btn" onPress={() => aiMut.mutate()} disabled={aiMut.isPending} hitSlop={10}>
+              <Icon name="cpu" size={20} color={colors.brandPrimary} />
+            </Pressable>
+          ) : undefined
         }
       />
       <View style={styles.progressTrack}>

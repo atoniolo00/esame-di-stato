@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import json
+import random
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
@@ -96,7 +97,21 @@ async def seed_database():
         d = dict(q)
         d["qid"] = f"seed-{i}"
         d.setdefault("ai_generated", False)
+        # Deterministic shuffle so the correct answer isn't always the first option
+        order = list(range(len(d["options"])))
+        random.Random(d["qid"]).shuffle(order)
+        d["options"] = [q["options"][j] for j in order]
+        d["correct"] = order.index(q["correct"])
         await db.questions.update_one({"qid": d["qid"]}, {"$set": d}, upsert=True)
+        # keep saved mistakes aligned with the reordered options
+        async for m in db.mistakes.find({"question_id": d["qid"]}):
+            old = m.get("options") or []
+            sel = m.get("selected_index")
+            new_sel = d["options"].index(old[sel]) if sel is not None and sel < len(old) and old[sel] in d["options"] else sel
+            await db.mistakes.update_one({"_id": m["_id"]}, {"$set": {
+                "question": d["question"], "options": d["options"], "correct": d["correct"],
+                "explanation": d["explanation"], "selected_index": new_sel,
+            }})
 
     # Flashcards — upsert by stable fid
     for i, f in enumerate(content.ALL_FLASHCARDS):
@@ -224,6 +239,23 @@ async def get_quiz(category: Optional[str] = None, limit: int = 10):
     return questions
 
 
+@api_router.get("/quiz/mistakes")
+async def get_mistakes_quiz(device_id: str = Query(...)):
+    docs = await db.mistakes.find({"device_id": device_id}, {"_id": 0}).to_list(500)
+    out = []
+    for m in docs:
+        out.append({
+            "qid": m["question_id"],
+            "category": m.get("category"),
+            "topic": None,
+            "question": m["question"],
+            "options": m["options"],
+            "correct": m["correct"],
+            "explanation": m["explanation"],
+        })
+    return out
+
+
 @api_router.get("/quiz/simulation")
 async def get_simulation(count: int = 20, category: Optional[str] = None):
     count = max(5, min(count, 40))
@@ -329,13 +361,16 @@ async def generate_quiz(payload: GenerateQuizIn):
         if not isinstance(q.get("options"), list) or len(q["options"]) < 2:
             continue
         qid = f"ai-{payload.category}-{base}-{i}"
+        opts = list(q["options"])
+        right = opts[int(q.get("correct", 0))] if 0 <= int(q.get("correct", 0)) < len(opts) else opts[0]
+        random.shuffle(opts)
         doc = {
             "qid": qid,
             "category": payload.category,
             "topic": None,
             "question": q.get("question", ""),
-            "options": q["options"],
-            "correct": int(q.get("correct", 0)),
+            "options": opts,
+            "correct": opts.index(right),
             "explanation": q.get("explanation", ""),
             "ai_generated": True,
         }

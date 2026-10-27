@@ -123,6 +123,7 @@ export default function PracticeScreen() {
                 })
               : (catsQ.data ?? []).map((c) => {
                   const count = mode === "quiz" ? c.question_count : c.flashcard_count;
+                  if (!count) return null;
                   return (
                     <Pressable
                       key={c.slug}
