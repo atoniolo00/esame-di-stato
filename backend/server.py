@@ -27,6 +27,9 @@ db = client[os.environ['DB_NAME']]
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
 
 app = FastAPI(title="ArchEsame API")
+app.get("/health")
+   async def health():
+       return {"status": "ok"}
 api_router = APIRouter(prefix="/api")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
